@@ -1,7 +1,7 @@
 {
   "name": "tualo-git-context",
   "main": "./lib/tualo-git-context",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "GIT commands in the filetree",
   "activationEvents": [
     "tualo-git-context:toggle",
