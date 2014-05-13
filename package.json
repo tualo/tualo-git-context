@@ -1,0 +1,19 @@
+{
+  "name": "tualo-git-context",
+  "main": "./lib/tualo-git-context",
+  "version": "0.0.1",
+  "description": "GIT commands in the filetree",
+  "activationEvents": [
+    "tualo-git-context:toggle",
+    "tualo-git-context:commit",
+    "tualo-git-context:staging",
+    "tualo-git-context:status"
+  ],
+  "repository": "https://github.com/atom/tualo-git-context",
+  "license": "MIT",
+  "engines": {
+    "atom": ">0.50.0"
+  },
+  "dependencies": {
+  }
+}
