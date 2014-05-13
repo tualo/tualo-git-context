@@ -1,0 +1,21 @@
+# See https://atom.io/docs/latest/creating-a-package#menus for more details
+'context-menu':
+  '.overlayer':
+      'Enable tualo-git-context': 'tualo-git-context:toggle'
+  '.tree-view':
+    'GIT: stage': 'tualo-git-context:staging'
+    'GIT: commit': 'tualo-git-context:commit'
+    'GIT: status': 'tualo-git-context:status'
+    'GIT: reset': 'tualo-git-context:reset'
+    'GIT: toggle': 'tualo-git-context:toggle'
+'menu': [
+  {
+    'label': 'Packages'
+    'submenu': [
+      'label': 'tualo-git-context'
+      'submenu': [
+        { 'label': 'Toggle', 'command': 'tualo-git-context:toggle' }
+      ]
+    ]
+  }
+]
