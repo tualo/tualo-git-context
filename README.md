@@ -1,5 +1,7 @@
 # tualo-git-context package
 
-A short description of your package.
+Added the basic git commands in the file tree view.
 
-![A screenshot of your spankin' package](https://f.cloud.github.com/assets/69169/2290250/c35d867a-a017-11e3-86be-cd7c5bf3ff9b.gif)
+See <https://atom.io/packages/tualo-git-context>
+
+![](https://raw.githubusercontent.com/tualo/tualo-git-context/master/tualo-git-context-preview-atom.png)
