@@ -6,8 +6,22 @@
 
 .tualo-git-context {
 }
-.tree-view .entry.directory.status-staged > .header,
-.tree-view .entry.file.status-staged {
-  color: rgb(255, 255, 0);
-  /*text-shadow: 0 0 1px rgba(255, 255, 0, 1);*/
+.tree-view .entry.directory.git-staged > .header,
+.tree-view .entry.file.git-staged {
+  color: rgb(255, 255, 0) !important;
+}
+
+.tree-view .entry.directory.git-added > .header,
+.tree-view .entry.file.git-added {
+  color: rgb(0, 255, 0) !important;
+}
+
+.tree-view .entry.directory.git-modified > .header,
+.tree-view .entry.file.git-modified {
+  color: rgb(255, 155, 0) !important;
+}
+
+.tree-view .entry.directory.git-none > .header,
+.tree-view .entry.file.git-none {
+  color: rgb(205, 205, 205) !important;
 }
