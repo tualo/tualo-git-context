@@ -1,9 +1,8 @@
 {
   "name": "tualo-git-context",
   "main": "./lib/tualo-git-context",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "GIT commands in the filetree",
-
   "repository": "https://github.com/tualo/tualo-git-context",
   "license": "MIT",
   "engines": {
