@@ -11,14 +11,14 @@ class TualoGitContextView extends View
 #      @div "The TualoGitContext package is Alive! It's ALIVE!", class: "message"
 
   initialize: (serializeState) ->
-    atom.workspaceView.command "tualo-git-context:toggle", => @toggle()
+    #atom.workspaceView.command "tualo-git-context:toggle", => @toggle()
     atom.workspaceView.command "tualo-git-context:ignore", => @ignore()
     atom.workspaceView.command "tualo-git-context:staging", => @staging()
     atom.workspaceView.command "tualo-git-context:reset", => @reset()
     atom.workspaceView.command "tualo-git-context:status", => @status()
     atom.workspaceView.command "tualo-git-context:commit", => @commit()
     setInterval @refreshTree, 5000
-
+    @refreshTree()
   # Returns an object that can be retrieved when package is activated
   serialize: ->
 
