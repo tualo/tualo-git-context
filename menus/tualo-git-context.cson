@@ -7,7 +7,6 @@
     'GIT: commit': 'tualo-git-context:commit'
     'GIT: status': 'tualo-git-context:status'
     'GIT: reset': 'tualo-git-context:reset'
-    'GIT: toggle': 'tualo-git-context:toggle'
 'menu': [
   {
     'label': 'Packages'
