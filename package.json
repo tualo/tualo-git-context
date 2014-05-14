@@ -3,12 +3,7 @@
   "main": "./lib/tualo-git-context",
   "version": "0.2.0",
   "description": "GIT commands in the filetree",
-  "activationEvents": [
-    "tualo-git-context:toggle",
-    "tualo-git-context:commit",
-    "tualo-git-context:staging",
-    "tualo-git-context:status"
-  ],
+
   "repository": "https://github.com/tualo/tualo-git-context",
   "license": "MIT",
   "engines": {
