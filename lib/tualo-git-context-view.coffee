@@ -188,7 +188,7 @@ class TualoGitContextView extends View
 #      atom.set('tualo-git-intervalID',intervallID)
     #console.log atom.get('tualo-git-intervalID')
     root = atom.project.getRootDirectory()
-    root.getEntries (error,files) =>
+    root?.getEntries (error,files) =>
 
       options =
         cwd: atom.project.getPath()
