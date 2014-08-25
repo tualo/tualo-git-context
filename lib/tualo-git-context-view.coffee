@@ -188,48 +188,49 @@ class TualoGitContextView extends View
 #      atom.set('tualo-git-intervalID',intervallID)
     #console.log atom.get('tualo-git-intervalID')
     root = atom.project.getRootDirectory()
-    root.getEntries (error,files) =>
-
-      options =
-        cwd: atom.project.getPath()
-        timeout: 30000
-      exec 'git status',options, (err,stdout,stderr) =>
-        lines = stdout.split("\n")
-        state = 0
-        atom.workspaceView.find('span[data-path]').parent().removeClass('git-staged')
-        atom.workspaceView.find('span[data-path]').parent().removeClass('git-added')
-        atom.workspaceView.find('span[data-path]').parent().removeClass('git-modified')
-        atom.workspaceView.find('span[data-path]').parent().removeClass('git-none')
-        atom.workspaceView.find('span[data-path]').parent().addClass('git-none')
-
-        for i in [0...lines.length]
-          p = lines[i].indexOf(":")
-          if state == 3
-            fname = lines[i].replace(/\s/g,'')
-          else
-            fstate = lines[i].substring(0,p).replace(/\s/g,'')
-            fname = lines[i].substring(p+1).replace(/\s/g,'')
-
-
-          if(state == 1) # here are the staged files
-            if (fstate != "")
-              atom.workspaceView.find('span[data-path="'+fname+'"]').parent().removeClass('git-none')
-              atom.workspaceView.find('span[data-path="'+fname+'"]').parent().addClass('git-staged')
-          if(state == 2)
-            if (fstate == 'modified')
-              atom.workspaceView.find('span[data-path="'+fname+'"]').parent().removeClass('git-none')
-              atom.workspaceView.find('span[data-path="'+fname+'"]').parent().addClass('git-modified')
-            if (fstate == 'newfile')
+    if root?
+      root.getEntries (error,files) =>
+  
+        options =
+          cwd: atom.project.getPath()
+          timeout: 30000
+        exec 'git status',options, (err,stdout,stderr) =>
+          lines = stdout.split("\n")
+          state = 0
+          atom.workspaceView.find('span[data-path]').parent().removeClass('git-staged')
+          atom.workspaceView.find('span[data-path]').parent().removeClass('git-added')
+          atom.workspaceView.find('span[data-path]').parent().removeClass('git-modified')
+          atom.workspaceView.find('span[data-path]').parent().removeClass('git-none')
+          atom.workspaceView.find('span[data-path]').parent().addClass('git-none')
+  
+          for i in [0...lines.length]
+            p = lines[i].indexOf(":")
+            if state == 3
+              fname = lines[i].replace(/\s/g,'')
+            else
+              fstate = lines[i].substring(0,p).replace(/\s/g,'')
+              fname = lines[i].substring(p+1).replace(/\s/g,'')
+  
+  
+            if(state == 1) # here are the staged filesge
+              if (fstate != "")
+                atom.workspaceView.find('span[data-path="'+fname+'"]').parent().removeClass('git-none')
+                atom.workspaceView.find('span[data-path="'+fname+'"]').parent().addClass('git-staged')
+            if(state == 2)
+              if (fstate == 'modified')
+                atom.workspaceView.find('span[data-path="'+fname+'"]').parent().removeClass('git-none')
+                atom.workspaceView.find('span[data-path="'+fname+'"]').parent().addClass('git-modified')
+              if (fstate == 'newfile')
+                atom.workspaceView.find('span[data-path="'+fname+'"]').parent().removeClass('git-none')
+                atom.workspaceView.find('span[data-path="'+fname+'"]').parent().addClass('git-added')
+            if (state == 3)
               atom.workspaceView.find('span[data-path="'+fname+'"]').parent().removeClass('git-none')
               atom.workspaceView.find('span[data-path="'+fname+'"]').parent().addClass('git-added')
-          if (state == 3)
-            atom.workspaceView.find('span[data-path="'+fname+'"]').parent().removeClass('git-none')
-            atom.workspaceView.find('span[data-path="'+fname+'"]').parent().addClass('git-added')
-
-          if (lines[i].indexOf("Changes to be committed:")>=0)
-            state=1
-          if (lines[i].indexOf("Changes not staged for commit:")>=0)
-            state=2
-          if (lines[i].indexOf("Untracked files:")>=0)
-            state=3
-            i++
+  
+            if (lines[i].indexOf("Changes to be committed:")>=0)
+              state=1
+            if (lines[i].indexOf("Changes not staged for commit:")>=0)
+              state=2
+            if (lines[i].indexOf("Untracked files:")>=0)
+              state=3
+              i++
