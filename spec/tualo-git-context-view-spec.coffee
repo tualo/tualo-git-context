@@ -2,4 +2,4 @@ TualoGitContextView = require '../lib/tualo-git-context-view'
 
 #describe "TualoGitContextView", ->
 #  it "has one valid test", ->
-#    expect("life").toBe "easy"
+#    expect(1).toBe "easy"
