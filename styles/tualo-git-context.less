@@ -5,10 +5,23 @@
 @import "ui-variables";
 
 
-.tualo-git-context {
 
-}
 
 .tualo-git-context > .default-message {
-  color: rgb(255, 255, 0)
+  color:   saturate(spin( @text-color-added, 10), 10%);
+}
+
+.tualo-git-context-new {
+  color:   saturate(spin( @text-color-added, 10), 10%);
+}
+.tualo-git-context-changed {
+  color:   saturate(spin( @text-color-modified, 10), 10%);
+}
+
+.tualo-git-context-nothing {
+  color:   saturate(spin( @text-color, 10), 10%);
+}
+
+.tualo-git-context-staged {
+  color:   saturate(spin( @text-color-renamed, 10), 10%);
 }
