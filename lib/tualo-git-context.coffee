@@ -184,7 +184,7 @@ module.exports =
         detailedMessage: stdout
         buttons: ['OK']
   status: ->
-    @showMessage 'retrieving status ...'
+    @showMessage 'retrieving status ...',1000
     fileName = @getCurrentFile()
     pathName = @getCurrentPath()
     if fileName!=null
