@@ -18,7 +18,7 @@ class TualoGitContextView
     @message.classList.add('default-message')
     @messageElement.appendChild(@message)
 
-
+    console.log 'debug'
     @statusNew = {};
     @statusChanged = {};
     @statusStaged = {};
@@ -34,8 +34,10 @@ class TualoGitContextView
       @commitMessageFilePath = path.join paths[0],'.commitmessage'
 
     @myDisposables = []
+
     atom.workspace.onDidOpen (event) =>
-      @refreshTree()
+      shortFilePath = event.uri.substring @getRepository().getWorkingDirectory().length+1
+      @gitStatus shortFilePath
 
     atom.workspace.observeTextEditors (editor) =>
 
@@ -44,9 +46,16 @@ class TualoGitContextView
           atom.workspace.destroyActivePaneItem()
           if typeof @commitMsgCallback == 'function'
             @commitMsgCallback()
-        @refreshTree()
+        shortFilePath = event.path.substring @getRepository().getWorkingDirectory().length+1
+        @gitStatus shortFilePath
 
     @refreshTree()
+
+  getRepository: ->
+    repos = atom.project.getRepositories()
+    if repos.length>0
+      return repos[0]
+
 
   serialize: ->
 
@@ -69,15 +78,14 @@ class TualoGitContextView
   setCommitCallback: (cb) ->
     @commitMsgCallback = cb
 
-  gitStatus: (path,fileName)->
-
+  gitStatus: (fileName)->
+    longName = @getRepository().getWorkingDirectory()+'/'+fileName
     options =
-      cwd: path
+      cwd: @getRepository().getWorkingDirectory()
       timeout: 30000
     exec 'git status '+fileName,options, (err,stdout,stderr) =>
       lines = stdout.split("\n")
       state = 0
-
       for i in [0...lines.length]
         p = lines[i].indexOf(":")
         if state == 3
@@ -94,15 +102,14 @@ class TualoGitContextView
         if (lines[i].indexOf("Untracked files:")>=0)
           state=3
           i++
-
-      entryNode = document.querySelector('span[data-path="'+fileName+'"]')
+      entryNode = document.querySelector('span[data-path="'+longName+'"]')
       if typeof entryNode != 'undefined' && entryNode != null
 
-        delete  @statusClean[fileName];
-        delete  @statusIgnored[fileName];
-        delete  @statusNew[fileName];
-        delete  @statusChanged[fileName];
-        delete  @statusStaged[fileName];
+        delete  @statusClean[longName];
+        delete  @statusIgnored[longName];
+        delete  @statusNew[longName];
+        delete  @statusChanged[longName];
+        delete  @statusStaged[longName];
 
         oldNames = entryNode.className.split(' ')
         newNames = []
@@ -115,28 +122,25 @@ class TualoGitContextView
             newNames.push(oldNames[i])
 
         if state == 0
-          @statusClean[fileName] =
-            path: path,
+          @statusClean[longName] =
             entryNode: entryNode
           newNames.push('tualo-git-context-nothing')
 
         if state == 1
-          @statusStaged[fileName] =
-            path: path,
+          @statusStaged[longName] =
             entryNode: entryNode
           newNames.push('tualo-git-context-staged')
 
         if state == 2
-          @statusChanged[fileName] =
-            path: path,
+          @statusChanged[longName] =
             entryNode: entryNode
           newNames.push('tualo-git-context-changed')
 
         if state == 3
-          @statusNew[fileName] =
-            path: path,
+          @statusNew[longName] =
             entryNode: entryNode
           newNames.push('tualo-git-context-new')
+
         entryNode.className = newNames.join(' ')
 
   refreshTree: (dir) ->
@@ -151,6 +155,7 @@ class TualoGitContextView
           dir.getEntries (error,entries) =>
             for f in [0...entries.length]
               if entries[f] instanceof File
-                @gitStatus path,entries[f].path
+                shortFilePath = entries[f].path.substring @getRepository().getWorkingDirectory().length+1
+                @gitStatus shortFilePath
               if entries[f] instanceof Directory
                 @refreshTree entries[f]
