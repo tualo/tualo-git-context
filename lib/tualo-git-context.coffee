@@ -86,14 +86,14 @@ module.exports =
       timeout: 30000
     shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
     exec 'git add '+shortFilePath,options, (err,stdout,stderr) =>
+
       if err
         @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
       else if stderr
         @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
       else
         @showMessage '<pre>'+'file added to stage'+"\n"+'</pre>', 1000
-      @tualoGitContextView.gitStatus path,fileName
-      @tualoGitContextView.refreshTree()
+      @tualoGitContextView.gitStatus shortFilePath
   staging: ->
     @showMessage 'staging ...'
     fileName = @getCurrentFile()
@@ -127,7 +127,7 @@ module.exports =
         @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
       else
         @showMessage '<pre>'+'added to .gitignore'+"\n"+'</pre>', 1000
-      @tualoGitContextView.refreshTree()
+      @tualoGitContextView.getStatus  @getRepository().getWorkingDirectory(),shortFilePath
 
   ignore: ->
     @showMessage 'ignoring ...'
@@ -158,8 +158,8 @@ module.exports =
         @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
       else
         @showMessage '<pre>'+'file was unstaged'+"\n"+'</pre>', 1000
+      @tualoGitContextView.gitStatus shortFilePath
 
-      @tualoGitContextView.refreshTree()
   reset: ->
     @showMessage 'resetting ...'
     fileName = @getCurrentFile()
@@ -212,7 +212,7 @@ module.exports =
       else
         @showMessage '<pre>'+'commited'+"\n"+'</pre>', 1000
       fs.unlink @tualoGitContextView.getCommitFilePath()
-      @tualoGitContextView.refreshTree()
+      @tualoGitContextView.gitStatus shortFilePath
 
   commit: ->
     #@showMessage 'commiting ...'
@@ -244,7 +244,7 @@ module.exports =
       else
         @showMessage '<pre>'+'commited'+"\n"+'</pre>', 1000
       fs.unlink @tualoGitContextView.getCommitFilePath()
-      @tualoGitContextView.refreshTree()
+      @tualoGitContextView.gitStatus shortFilePath
 
 
 
@@ -265,8 +265,8 @@ module.exports =
         @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
       else
         @showMessage '<pre>'+'file was unstaged'+"\n"+'</pre>', 1000
+      @tualoGitContextView.gitStatus shortFilePath
 
-      @tualoGitContextView.refreshTree()
   remove: ->
     @showMessage 'removing ...'
     fileName = @getCurrentFile()
