@@ -71,11 +71,15 @@ module.exports =
     else
       elem.getAttribute('data-path')
 
+  getRepository: ->
+    repos = atom.project.getRepositories()
+    if repos.length>0
+      return repos[0]
 
 
   gitAdd: (fileName) ->
     options =
-      cwd: atom.project.getRepo().getWorkingDirectory()
+      cwd: @getRepository().getWorkingDirectory()
       timeout: 30000
     shortFilePath = fileName.substring atom.project.getRepo().getWorkingDirectory().length+1
     exec 'git add '+shortFilePath,options, (err,stdout,stderr) =>
@@ -110,7 +114,7 @@ module.exports =
 
   gitIgnore: (fileName) ->
     options =
-      cwd: atom.project.getRepo().getWorkingDirectory()
+      cwd: @getRepository().getWorkingDirectory()
       timeout: 30000
     shortFilePath = fileName.substring atom.project.getRepo().getWorkingDirectory().length
     #@showMessage atom.project.getRepo().getWorkingDirectory()+"\n"+fileName+"\n"+shortFilePath
@@ -135,7 +139,7 @@ module.exports =
 
   gitReset: (fileName)->
     options =
-      cwd: atom.project.getRepo().getWorkingDirectory()
+      cwd: @getRepository().getWorkingDirectory()
       timeout: 30000
     shortFilePath = fileName.substring atom.project.getRepo().getWorkingDirectory().length
 
@@ -158,7 +162,7 @@ module.exports =
 
   gitStatus: (fileOrPath) ->
     options =
-      cwd: atom.project.getRepo().getWorkingDirectory()
+      cwd: @getRepository().getWorkingDirectory()
       timeout: 30000
     shortFilePath = fileOrPath.substring atom.project.getRepo().getWorkingDirectory().length+1
     exec 'git status '+shortFilePath,options, (err,stdout,stderr) =>
@@ -182,7 +186,7 @@ module.exports =
 
   gitCommit: (fileName)->
     options =
-      cwd: atom.project.getRepo().getWorkingDirectory()
+      cwd: @getRepository().getWorkingDirectory()
       timeout: 30000
     shortFilePath = fileName.substring atom.project.getRepo().getWorkingDirectory().length+1
     @tualoGitContextView.setCommitCallback null
