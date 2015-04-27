@@ -15,7 +15,6 @@ Commands
 How to use
 ==========
 
-
 See <https://atom.io/packages/tualo-git-context>
 
 ![](https://raw.githubusercontent.com/tualo/tualo-git-context/master/tualo-git-context-preview-atom.png)
