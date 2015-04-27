@@ -8,6 +8,7 @@
       'commit': 'tualo-git-context:commit'
       'status': 'tualo-git-context:status'
       'unstage': 'tualo-git-context:reset'
+      'remove': 'tualo-git-context:remove'
       'ignore': 'tualo-git-context:ignore'
 'menu': [
   {
