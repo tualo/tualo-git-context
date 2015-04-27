@@ -81,7 +81,7 @@ module.exports =
     options =
       cwd: @getRepository().getWorkingDirectory()
       timeout: 30000
-    shortFilePath = fileName.substring atom.project.getRepo().getWorkingDirectory().length+1
+    shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
     exec 'git add '+shortFilePath,options, (err,stdout,stderr) =>
       if err
         @showMessage '<pre>'+'ERROR '+err+'</pre>'
@@ -116,8 +116,7 @@ module.exports =
     options =
       cwd: @getRepository().getWorkingDirectory()
       timeout: 30000
-    shortFilePath = fileName.substring atom.project.getRepo().getWorkingDirectory().length
-    #@showMessage atom.project.getRepo().getWorkingDirectory()+"\n"+fileName+"\n"+shortFilePath
+    shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length-1
     exec 'echo "'+shortFilePath+'" >> .gitignore',options, (err,stdout,stderr) =>
       @showMessage 'added to ignored files'
       @tualoGitContextView.refreshTree()
@@ -141,7 +140,7 @@ module.exports =
     options =
       cwd: @getRepository().getWorkingDirectory()
       timeout: 30000
-    shortFilePath = fileName.substring atom.project.getRepo().getWorkingDirectory().length
+    shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length
 
     exec 'git reset HEAD '+shortFilePath+'',options, (err,stdout,stderr) =>
       @showMessage 'reset to HEAD'
@@ -164,7 +163,7 @@ module.exports =
     options =
       cwd: @getRepository().getWorkingDirectory()
       timeout: 30000
-    shortFilePath = fileOrPath.substring atom.project.getRepo().getWorkingDirectory().length+1
+    shortFilePath = fileOrPath.substring @getRepository().getWorkingDirectory().length+1
     exec 'git status '+shortFilePath,options, (err,stdout,stderr) =>
       atom.confirm
         message: 'GIT Status'
@@ -188,7 +187,7 @@ module.exports =
     options =
       cwd: @getRepository().getWorkingDirectory()
       timeout: 30000
-    shortFilePath = fileName.substring atom.project.getRepo().getWorkingDirectory().length+1
+    shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
     @tualoGitContextView.setCommitCallback null
     exec 'git commit '+shortFilePath+' -F '+@tualoGitContextView.getCommitFilePath(),options, (err,stdout,stderr) =>
       if err
