@@ -40,12 +40,14 @@ module.exports =
   hideMessage: () ->
       @modalPanel.hide()
 
-  showMessage: (message) ->
+  showMessage: (message,timeout) ->
+    if typeof timeout == 'undefined'
+      timeout = 3000
     @tualoGitContextView.getMessage().innerHTML = message;
     @modalPanel.show()
     if typeof @messageTimer != 'undefined'
       clearTimeout @messageTimer
-    @messageTimer = setTimeout(@hideMessage.bind(@), 3000)
+    @messageTimer = setTimeout(@hideMessage.bind(@), timeout)
 
 
 
@@ -84,11 +86,11 @@ module.exports =
     shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
     exec 'git add '+shortFilePath,options, (err,stdout,stderr) =>
       if err
-        @showMessage '<pre>'+'ERROR '+err+'</pre>'
+        @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
       else if stderr
-        @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>'
+        @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
       else
-        @showMessage '<pre>'+'file added to stage'+"\n"+'</pre>'
+        @showMessage '<pre>'+'file added to stage'+"\n"+'</pre>', 1000
       @tualoGitContextView.gitStatus path,fileName
       @tualoGitContextView.refreshTree()
   staging: ->
@@ -96,19 +98,19 @@ module.exports =
     fileName = @getCurrentFile()
     if fileName!=null
       if typeof @tualoGitContextView.statusChanged[fileName] == 'object'
-        @showMessage 'staging changed file ...'
+        @showMessage 'staging changed file ...', 1000
         @gitAdd fileName
 
       else if typeof @tualoGitContextView.statusNew[fileName] == 'object'
-        @showMessage 'staging new file ...'
+        @showMessage 'staging new file ...', 1000
         @gitAdd fileName
 
       else if typeof @tualoGitContextView.statusStaged[fileName] == 'object'
-        @showMessage 'this file is allready staged ...'
+        @showMessage 'this file is allready staged ...', 3000
       else
-        @showMessage 'there is nothing to stage ...'
+        @showMessage 'there is nothing to stage ...', 3000
     else
-      @showMessage 'only files are supported'
+      @showMessage 'only files are supported', 3000
 
 
 
@@ -118,7 +120,12 @@ module.exports =
       timeout: 30000
     shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length-1
     exec 'echo "'+shortFilePath+'" >> .gitignore',options, (err,stdout,stderr) =>
-      @showMessage 'added to ignored files'
+      if err
+        @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+      else if stderr
+        @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
+      else
+        @showMessage '<pre>'+'added to .gitignore'+"\n"+'</pre>', 1000
       @tualoGitContextView.refreshTree()
 
   ignore: ->
@@ -128,9 +135,9 @@ module.exports =
       if typeof @tualoGitContextView.statusNew[fileName] == 'object'
         @gitIgnore fileName
       else
-        @showMessage 'can\'t be ignored ...'
+        @showMessage 'can\'t be ignored ...', 5000
     else
-      @showMessage 'only files are supported'
+      @showMessage 'only files are supported', 5000
 
 
 
@@ -140,10 +147,17 @@ module.exports =
     options =
       cwd: @getRepository().getWorkingDirectory()
       timeout: 30000
-    shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length
+    shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
 
     exec 'git reset HEAD '+shortFilePath+'',options, (err,stdout,stderr) =>
       @showMessage 'reset to HEAD'
+      if err
+        @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+      else if stderr
+        @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
+      else
+        @showMessage '<pre>'+'file was unstaged'+"\n"+'</pre>', 1000
+
       @tualoGitContextView.refreshTree()
   reset: ->
     @showMessage 'resetting ...'
@@ -191,11 +205,11 @@ module.exports =
     @tualoGitContextView.setCommitCallback null
     exec 'git commit '+shortFilePath+' -F '+@tualoGitContextView.getCommitFilePath(),options, (err,stdout,stderr) =>
       if err
-        @showMessage '<pre>'+'ERROR '+err+'</pre>'
+        @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
       else if stderr
-        @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>'
+        @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
       else
-        @showMessage '<pre>'+'commited'+"\n"+'</pre>'
+        @showMessage '<pre>'+'commited'+"\n"+'</pre>', 1000
       fs.unlink @tualoGitContextView.getCommitFilePath()
       @tualoGitContextView.refreshTree()
 
