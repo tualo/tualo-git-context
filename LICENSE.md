@@ -1,4 +1,4 @@
-Copyright (c) 2014 tualo solutions GmbH, Thomas Hoffmann
+Copyright (c) 2014-2015 tualo solutions GmbH, Thomas Hoffmann
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
