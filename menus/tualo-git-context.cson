@@ -3,10 +3,12 @@
   '.overlayer':
       'Enable tualo-git-context': 'tualo-git-context:toggle'
   '.tree-view':
-    'GIT: stage': 'tualo-git-context:staging'
-    'GIT: commit': 'tualo-git-context:commit'
-    'GIT: status': 'tualo-git-context:status'
-    'GIT: reset': 'tualo-git-context:reset'
+    'git':
+      'stage': 'tualo-git-context:staging'
+      'commit': 'tualo-git-context:commit'
+      'status': 'tualo-git-context:status'
+      'unstage': 'tualo-git-context:reset'
+      'ignore': 'tualo-git-context:ignore'
 'menu': [
   {
     'label': 'Packages'
