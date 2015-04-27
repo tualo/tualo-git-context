@@ -25,6 +25,7 @@ module.exports =
     @subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:reset", => @reset()
     @subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:status", => @status()
     @subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:commit", => @commit()
+    @subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:remove", => @remove()
 
 
   deactivate: ->
@@ -225,5 +226,58 @@ module.exports =
           me.gitCommit fileName
       else
         @showMessage 'there is nothing on stage ...'
+    else
+      @showMessage 'only files are supported'
+
+
+  gitCommit: (fileName)->
+    options =
+      cwd: @getRepository().getWorkingDirectory()
+      timeout: 30000
+    shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
+    @tualoGitContextView.setCommitCallback null
+    exec 'git commit '+shortFilePath+' -F '+@tualoGitContextView.getCommitFilePath(),options, (err,stdout,stderr) =>
+      if err
+        @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+      else if stderr
+        @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
+      else
+        @showMessage '<pre>'+'commited'+"\n"+'</pre>', 1000
+      fs.unlink @tualoGitContextView.getCommitFilePath()
+      @tualoGitContextView.refreshTree()
+
+
+
+
+
+
+  gitRemove: (fileName)->
+    options =
+      cwd: @getRepository().getWorkingDirectory()
+      timeout: 30000
+    shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
+
+    exec 'git rm --cached '+shortFilePath+'',options, (err,stdout,stderr) =>
+      @showMessage 'reset to HEAD'
+      if err
+        @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+      else if stderr
+        @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
+      else
+        @showMessage '<pre>'+'file was unstaged'+"\n"+'</pre>', 1000
+
+      @tualoGitContextView.refreshTree()
+  remove: ->
+    @showMessage 'removing ...'
+    fileName = @getCurrentFile()
+    if fileName!=null
+      if typeof @tualoGitContextView.statusChanged[fileName] == 'object'
+        @gitRemove fileName
+      else if typeof @tualoGitContextView.statusStaged[fileName] == 'object'
+        @gitRemove fileName
+      else if typeof @tualoGitContextView.statusClean[fileName] == 'object'
+        @gitRemove fileName
+      else
+        @showMessage 'this file isn\'t on your index'
     else
       @showMessage 'only files are supported'
