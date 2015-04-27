@@ -1,4 +1,4 @@
-## 0.4.0 - beta release
+## 0.4.0
 * git commit opens an new editor tab
 * git commands are now in a submenu
 * fixed issue #5 <https://github.com/tualo/tualo-git-context/issues/6>
