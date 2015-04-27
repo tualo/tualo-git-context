@@ -15,8 +15,6 @@ Commands
 How to use
 ==========
 
-To start the git watcher simple choose the toggle from the context menu.
-
 
 See <https://atom.io/packages/tualo-git-context>
 
