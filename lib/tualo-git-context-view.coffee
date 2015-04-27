@@ -1,235 +1,146 @@
-{View} = require 'atom'
+{exec} = require 'child_process'
+{Directory} = require 'atom';
+{File} = require 'atom';
+
 {exec} = require 'child_process'
 fs = require 'fs'
 path = require 'path'
 crypto = require 'crypto'
 
 module.exports =
-class TualoGitContextView extends View
-  @content: ->
-    @div class: 'tualo-git-context'#, =>
-#      @div "The TualoGitContext package is Alive! It's ALIVE!", class: "message"
+class TualoGitContextView
 
-  initialize: (serializeState) ->
-    #atom.workspaceView.command "tualo-git-context:toggle", => @toggle()
-    atom.workspaceView.command "tualo-git-context:ignore", => @ignore()
-    atom.workspaceView.command "tualo-git-context:staging", => @staging()
-    atom.workspaceView.command "tualo-git-context:reset", => @reset()
-    atom.workspaceView.command "tualo-git-context:status", => @status()
-    atom.workspaceView.command "tualo-git-context:commit", => @commit()
-    setInterval @refreshTree, 5000
+  constructor: (serializeState) ->
+    @messageElement = document.createElement('div')
+    @messageElement.classList.add('tualo-git-context')
+    @message = document.createElement('div')
+    @message.textContent = ""
+    @message.classList.add('default-message')
+    @messageElement.appendChild(@message)
+
+
+    @statusNew = {};
+    @statusChanged = {};
+    @statusStaged = {};
+    @statusIgnored = {};
+    @statusClean = {};
+
+    @commitMsgCallback = null
+
+
+    @commitMessageFilePath = '/tmp/.commitmessage'
+    paths = atom.project.getPaths()
+    if path.length > 0
+      @commitMessageFilePath = path.join paths[0],'.commitmessage'
+
+    @myDisposables = []
+    atom.workspace.onDidOpen (event) =>
+      @refreshTree()
+
+    atom.workspace.observeTextEditors (editor) =>
+
+      @myDisposables.push editor.onDidSave (event) =>
+        if event.path == @commitMessageFilePath
+          atom.workspace.destroyActivePaneItem()
+          if typeof @commitMsgCallback == 'function'
+            @commitMsgCallback()
+        @refreshTree()
+
     @refreshTree()
-  # Returns an object that can be retrieved when package is activated
+
   serialize: ->
 
   # Tear down any state and detach
   destroy: ->
+
+    for i in [0...myDisposables.length]
+      @myDisposables[i].dispose()
+
+    @element.remove()
     @detach()
 
-  commit: ->
+  getMessageElement: ->
+    @messageElement
+  getMessage: ->
+    @message
 
-    classNames = ""
-    filePath = ""
-    if (atom.contextMenu.activeElement.tagName == 'SPAN')
-      classNames = atom.contextMenu.activeElement.parentElement.className
-      filePath = atom.contextMenu.activeElement.getAttribute('data-path')
-    else
-      classNames = atom.contextMenu.activeElement.className
-      filePath = atom.contextMenu.activeElement.childNodes[0].getAttribute('data-path')
+  getCommitFilePath: ->
+    @commitMessageFilePath
+  setCommitCallback: (cb) ->
+    @commitMsgCallback = cb
 
-    classes = classNames.split(' ');
-    if (classes.indexOf('file')>=0)
-      if (classes.indexOf('git-staged')>=0)
-        fileName = path.join atom.project.getPath(), '.git-commit-message'+crypto.randomBytes(8).toString('hex')
-        fs.writeFileSync fileName, ''
+  gitStatus: (path,fileName)->
 
-        editor = atom.workspaceView.openSync fileName
-        editor.on 'destroyed', () =>
-          fileBuffer = fs.readFileSync fileName
-          if fileBuffer.length > 0
-            #console.log 'GIT Commit: call the command here'
-            options =
-              cwd: atom.project.getPath()
-              timeout: 30000
-            exec 'git commit -F '+fileName+' ./'+filePath,options, (err,stdout,stderr) =>
-              console.log err,stdout,stderr
-              @refreshTree()
-              @unlinkMessageFile(fileName)
-          else
-            #console.log 'GIT Commit: nothing to commit'
-            @unlinkMessageFile(fileName)
-
-      else
-        console.log "Only modified files can be added to the stage!"
-    else
-      console.log "currently only files are supported"
-
-
-
-    #editorView = atom.workspaceView.getActiveView()
-    #res = atom.workspaceView.open fileName
-    #console.log res
-    #atom.workspaceView.one 'core:save',() =>
-    #  console.log fileName
-  unlinkMessageFile: (fileName)->
-    if fs.existsSync(fileName)
-      fs.unlink fileName
-
-
-
-
-
-
-
-
-  staging: ->
-    classNames = ""
-    filePath = ""
-    if (atom.contextMenu.activeElement.tagName == 'SPAN')
-      classNames = atom.contextMenu.activeElement.parentElement.className
-      filePath = atom.contextMenu.activeElement.getAttribute('data-path')
-    else
-      classNames = atom.contextMenu.activeElement.className
-      filePath = atom.contextMenu.activeElement.childNodes[0].getAttribute('data-path')
-
-    classes = classNames.split(' ');
-    if (classes.indexOf('file')>=0)
-      if classes.indexOf('git-modified')>=0 || classes.indexOf('git-added')>=0
-        options =
-          cwd: atom.project.getPath()
-          timeout: 30000
-        exec 'git add ./'+filePath,options, (err,stdout,stderr) =>
-          console.log err,stdout,stderr
-          @refreshTree()
-      else
-        console.log "Only modified files can be added to the stage!"
-    else
-      console.log "currently only files are supported"
-
-
-  ignore: ->
-    classNames = ""
-    filePath = ""
-    if (atom.contextMenu.activeElement.tagName == 'SPAN')
-      classNames = atom.contextMenu.activeElement.parentElement.className
-      filePath = atom.contextMenu.activeElement.getAttribute('data-path')
-    else
-      classNames = atom.contextMenu.activeElement.className
-      filePath = atom.contextMenu.activeElement.childNodes[0].getAttribute('data-path')
-
-    classes = classNames.split(' ');
-    if (classes.indexOf('file')>=0)
-      options =
-        cwd: atom.project.getPath()
-        timeout: 30000
-      exec 'echo "'+filePath+'" >> .gitignore',options, (err,stdout,stderr) =>
-        console.log err,stdout,stderr
-        @refreshTree()
-    else
-      console.log "currently only files are supported"
-      @refreshTree()
-
-  status: ->
     options =
-      cwd: atom.project.getPath()
+      cwd: path
       timeout: 30000
-    exec 'git status',options, (err,stdout,stderr) =>
-      @refreshTree()
-      atom.confirm
-        message: 'GIT Status'
-        detailedMessage: stdout
-        buttons: ['OK']
+    exec 'git status '+fileName,options, (err,stdout,stderr) =>
+      lines = stdout.split("\n")
+      state = 0
 
-  reset: ->
-    classNames = ""
-    filePath = ""
-    if (atom.contextMenu.activeElement.tagName == 'SPAN')
-      classNames = atom.contextMenu.activeElement.parentElement.className
-      filePath = atom.contextMenu.activeElement.getAttribute('data-path')
+      for i in [0...lines.length]
+        p = lines[i].indexOf(":")
+        if state == 3
+          fname = lines[i].replace(/\s/g,'')
+        else
+          fstate = lines[i].substring(0,p).replace(/\s/g,'')
+          fname = lines[i].substring(p+1).replace(/\s/g,'')
+        if (lines[i].indexOf("nothing to commit, working directory clean")>=0)
+          state=0
+        if (lines[i].indexOf("Changes to be committed:")>=0)
+          state=1
+        if (lines[i].indexOf("Changes not staged for commit:")>=0)
+          state=2
+        if (lines[i].indexOf("Untracked files:")>=0)
+          state=3
+          i++
+
+      entryNode = document.querySelector('span[data-path="'+fileName+'"]')
+      if typeof entryNode != 'undefined' && entryNode != null
+
+        delete  @statusClean[fileName];
+        delete  @statusIgnored[fileName];
+        delete  @statusNew[fileName];
+        delete  @statusChanged[fileName];
+        delete  @statusStaged[fileName];
+
+        if state == 0
+          @statusClean[fileName] =
+            path: path,
+            entryNode: entryNode
+          entryNode.style.color='rgb(200,200,200)';
+
+        if state == 1
+          @statusStaged[fileName] =
+            path: path,
+            entryNode: entryNode
+          entryNode.style.color='rgb(200,200,0)';
+
+        if state == 2
+          @statusChanged[fileName] =
+            path: path,
+            entryNode: entryNode
+          entryNode.style.color='rgb(230,150,0)';
+
+        if state == 3
+          @statusNew[fileName] =
+            path: path,
+            entryNode: entryNode
+          entryNode.style.color='rgb(0,200,0)';
+
+
+  refreshTree: (dir) ->
+    if typeof dir == 'undefined'
+      dirs = atom.project.getDirectories()
+      for i in [0...dirs.length]
+        @refreshTree dirs[i]
     else
-      classNames = atom.contextMenu.activeElement.className
-      filePath = atom.contextMenu.activeElement.childNodes[0].getAttribute('data-path')
-
-    classes = classNames.split(' ');
-    if (classes.indexOf('file')>=0)
-      options =
-        cwd: atom.project.getPath()
-        timeout: 30000
-      exec 'git reset HEAD '+filePath+'',options, (err,stdout,stderr) =>
-        @refreshTree
-        console.log err,stdout,stderr
-
-    else
-      @refreshTree
-      console.log "currently only files are supported"
-
-    console.log classNames, filePath
-
-
-
-
-
-  toggle: ->
-
-    if @hasParent()
-      #clearInterval atom.get('tualo-git-intervalID')
-      @detach()
-    else
-      #intervallID = setInterval @refreshTree, 5000
-      #atom.set('tualo-git-intervalID',intervallID)
-      atom.workspaceView.append(this)
-    @refreshTree()
-
-
-  refreshTree: ->
-#    if atom.get('tualo-git-intervalID')
-#    else
-#      intervallID = setTimeout @refreshTree, 5000
-#      atom.set('tualo-git-intervalID',intervallID)
-    #console.log atom.get('tualo-git-intervalID')
-    root = atom.project.getRootDirectory()
-    root.getEntries (error,files) =>
-
-      options =
-        cwd: atom.project.getPath()
-        timeout: 30000
-      exec 'git status',options, (err,stdout,stderr) =>
-        lines = stdout.split("\n")
-        state = 0
-        atom.workspaceView.find('span[data-path]').parent().removeClass('git-staged')
-        atom.workspaceView.find('span[data-path]').parent().removeClass('git-added')
-        atom.workspaceView.find('span[data-path]').parent().removeClass('git-modified')
-        atom.workspaceView.find('span[data-path]').parent().removeClass('git-none')
-        atom.workspaceView.find('span[data-path]').parent().addClass('git-none')
-
-        for i in [0...lines.length]
-          p = lines[i].indexOf(":")
-          if state == 3
-            fname = lines[i].replace(/\s/g,'')
-          else
-            fstate = lines[i].substring(0,p).replace(/\s/g,'')
-            fname = lines[i].substring(p+1).replace(/\s/g,'')
-
-
-          if(state == 1) # here are the staged files
-            if (fstate != "")
-              atom.workspaceView.find('span[data-path="'+fname+'"]').parent().removeClass('git-none')
-              atom.workspaceView.find('span[data-path="'+fname+'"]').parent().addClass('git-staged')
-          if(state == 2)
-            if (fstate == 'modified')
-              atom.workspaceView.find('span[data-path="'+fname+'"]').parent().removeClass('git-none')
-              atom.workspaceView.find('span[data-path="'+fname+'"]').parent().addClass('git-modified')
-            if (fstate == 'newfile')
-              atom.workspaceView.find('span[data-path="'+fname+'"]').parent().removeClass('git-none')
-              atom.workspaceView.find('span[data-path="'+fname+'"]').parent().addClass('git-added')
-          if (state == 3)
-            atom.workspaceView.find('span[data-path="'+fname+'"]').parent().removeClass('git-none')
-            atom.workspaceView.find('span[data-path="'+fname+'"]').parent().addClass('git-added')
-
-          if (lines[i].indexOf("Changes to be committed:")>=0)
-            state=1
-          if (lines[i].indexOf("Changes not staged for commit:")>=0)
-            state=2
-          if (lines[i].indexOf("Untracked files:")>=0)
-            state=3
-            i++
+      if (dir instanceof Directory)
+        path = dir.path
+        if path.substring(path.length-4)!='.git' # don't search git it self
+          dir.getEntries (error,entries) =>
+            for f in [0...entries.length]
+              if entries[f] instanceof File
+                @gitStatus path,entries[f].path
+              if entries[f] instanceof Directory
+                @refreshTree entries[f]
