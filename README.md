@@ -6,11 +6,11 @@ For commit messages a new editor tab will be opened.
 Commands
 ========
 
-  * toggle enables the watching process
   * status displays the git status
   * stage adds a file to the stage
-  * resets removes a file from the stage
+  * unstage removes a file from the stage
   * commit commit the file
+  * ignore add the file to .gitignore
 
 How to use
 ==========
