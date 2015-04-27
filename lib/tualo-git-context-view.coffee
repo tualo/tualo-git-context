@@ -104,30 +104,40 @@ class TualoGitContextView
         delete  @statusChanged[fileName];
         delete  @statusStaged[fileName];
 
+        oldNames = entryNode.className.split(' ')
+        newNames = []
+        for i in [0...oldNames.length]
+          if oldNames[i] == 'tualo-git-context-nothing'
+          else if oldNames[i] == 'tualo-git-context-new'
+          else if oldNames[i] == 'tualo-git-context-staged'
+          else if oldNames[i] == 'tualo-git-context-changed'
+          else
+            newNames.push(oldNames[i])
+
         if state == 0
           @statusClean[fileName] =
             path: path,
             entryNode: entryNode
-          entryNode.style.color='rgb(200,200,200)';
+          newNames.push('tualo-git-context-nothing')
 
         if state == 1
           @statusStaged[fileName] =
             path: path,
             entryNode: entryNode
-          entryNode.style.color='rgb(200,200,0)';
+          newNames.push('tualo-git-context-staged')
 
         if state == 2
           @statusChanged[fileName] =
             path: path,
             entryNode: entryNode
-          entryNode.style.color='rgb(230,150,0)';
+          newNames.push('tualo-git-context-changed')
 
         if state == 3
           @statusNew[fileName] =
             path: path,
             entryNode: entryNode
-          entryNode.style.color='rgb(0,200,0)';
-
+          newNames.push('tualo-git-context-new')
+        entryNode.className = newNames.join(' ')
 
   refreshTree: (dir) ->
     if typeof dir == 'undefined'
