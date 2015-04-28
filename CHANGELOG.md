@@ -1,3 +1,9 @@
+## 0.6.0
+* performace improvements
+* removed toggle from menu
+* fixed issue #14 <https://github.com/tualo/tualo-git-context/issues/14>
+* fixed issue #12 <https://github.com/tualo/tualo-git-context/issues/12>
+
 ## 0.4.0
 * git commit opens an new editor tab
 * git commands are now in a submenu
