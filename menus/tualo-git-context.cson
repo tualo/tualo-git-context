@@ -10,14 +10,15 @@
       'unstage': 'tualo-git-context:reset'
       'remove': 'tualo-git-context:remove'
       'ignore': 'tualo-git-context:ignore'
-'menu': [
-  {
-    'label': 'Packages'
-    'submenu': [
-      'label': 'tualo-git-context'
-      'submenu': [
-        { 'label': 'Toggle', 'command': 'tualo-git-context:toggle' }
-      ]
-    ]
-  }
-]
+      'revert': 'tualo-git-context:revert'
+#'menu': [
+#  {
+#    'label': 'Packages'
+#    'submenu': [
+#      'label': 'tualo-git-context'
+#      'submenu': [
+#        { 'label': 'Toggle', 'command': 'tualo-git-context:toggle' }
+#      ]
+#    ]
+#  }
+#]
