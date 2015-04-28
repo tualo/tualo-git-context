@@ -6,7 +6,6 @@
 fs = require 'fs'
 path = require 'path'
 crypto = require 'crypto'
-glob = require 'glob'
 
 module.exports =
 class TualoGitContextView
