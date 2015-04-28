@@ -1,3 +1,6 @@
+## 0.7.0
+* fixed detach error
+
 ## 0.6.0
 * performace improvements
 * removed toggle from menu
