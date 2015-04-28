@@ -26,6 +26,7 @@ module.exports =
     @subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:status", => @status()
     @subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:commit", => @commit()
     @subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:remove", => @remove()
+    @subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:revert", => @revert()
 
 
   deactivate: ->
@@ -281,3 +282,31 @@ module.exports =
         @showMessage 'this file isn\'t on your index'
     else
       @showMessage 'only files are supported'
+
+
+
+
+
+
+  gitRevert: ()->
+    options =
+      cwd: @getRepository().getWorkingDirectory()
+      timeout: 30000
+    exec 'git revert HEAD',options, (err,stdout,stderr) =>
+      @showMessage 'revert to HEAD'
+      if err
+        @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+      else if stderr
+        @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
+      else
+        @showMessage '<pre>'+'reverted'+"\n"+'</pre>', 1000
+      @tualoGitContextView.refreshTree()
+
+  revert: ->
+    atom.confirm
+        message: "You sure?"
+        buttons:
+          Cancel: =>
+
+          Revert: =>
+            @gitRevert()
