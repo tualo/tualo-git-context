@@ -60,11 +60,9 @@ class TualoGitContextView
 
   # Tear down any state and detach
   destroy: ->
-
-    for i in [0...myDisposables.length]
-      @myDisposables[i].dispose()
-
-    @element.remove()
+    #for i in [0...myDisposables.length]
+    #  @myDisposables[i].dispose()
+    @messageElement.remove()
     @detach()
 
   getMessageElement: ->
