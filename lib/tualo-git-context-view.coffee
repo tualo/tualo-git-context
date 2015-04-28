@@ -18,7 +18,6 @@ class TualoGitContextView
     @message.classList.add('default-message')
     @messageElement.appendChild(@message)
 
-    console.log 'debug'
     @statusNew = {};
     @statusChanged = {};
     @statusStaged = {};
