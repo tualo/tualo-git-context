@@ -1,3 +1,6 @@
+## 0.8.0
+* fixed no working directory 
+
 ## 0.7.0
 * fixed detach error
 

@@ -82,170 +82,180 @@ module.exports =
 
 
   gitAdd: (fileName) ->
-    options =
-      cwd: @getRepository().getWorkingDirectory()
-      timeout: 30000
-    shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
-    exec 'git add '+shortFilePath,options, (err,stdout,stderr) =>
+    if @getRepository()
+      options =
+        cwd: @getRepository().getWorkingDirectory()
+        timeout: 30000
+      shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
+      exec 'git add '+shortFilePath,options, (err,stdout,stderr) =>
 
-      if err
-        @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
-      else if stderr
-        @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
-      else
-        @showMessage '<pre>'+'file added to stage'+"\n"+'</pre>', 1000
-      @tualoGitContextView.gitStatus shortFilePath
+        if err
+          @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+        else if stderr
+          @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
+        else
+          @showMessage '<pre>'+'file added to stage'+"\n"+'</pre>', 1000
+        @tualoGitContextView.gitStatus shortFilePath
   staging: ->
-    @showMessage 'staging ...'
-    fileName = @getCurrentFile()
-    if fileName!=null
-      if typeof @tualoGitContextView.statusChanged[fileName] == 'object'
-        @showMessage 'staging changed file ...', 1000
-        @gitAdd fileName
+    if @getRepository()
+      @showMessage 'staging ...'
+      fileName = @getCurrentFile()
+      if fileName!=null
+        if typeof @tualoGitContextView.statusChanged[fileName] == 'object'
+          @showMessage 'staging changed file ...', 1000
+          @gitAdd fileName
 
-      else if typeof @tualoGitContextView.statusNew[fileName] == 'object'
-        @showMessage 'staging new file ...', 1000
-        @gitAdd fileName
+        else if typeof @tualoGitContextView.statusNew[fileName] == 'object'
+          @showMessage 'staging new file ...', 1000
+          @gitAdd fileName
 
-      else if typeof @tualoGitContextView.statusStaged[fileName] == 'object'
-        @showMessage 'this file is allready staged ...', 3000
+        else if typeof @tualoGitContextView.statusStaged[fileName] == 'object'
+          @showMessage 'this file is allready staged ...', 3000
+        else
+          @showMessage 'there is nothing to stage ...', 3000
       else
-        @showMessage 'there is nothing to stage ...', 3000
-    else
-      @showMessage 'only files are supported', 3000
+        @showMessage 'only files are supported', 3000
 
 
 
   gitIgnore: (fileName) ->
-    options =
-      cwd: @getRepository().getWorkingDirectory()
-      timeout: 30000
-    shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length-1
-    exec 'echo "'+shortFilePath+'" >> .gitignore',options, (err,stdout,stderr) =>
-      if err
-        @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
-      else if stderr
-        @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
-      else
-        @showMessage '<pre>'+'added to .gitignore'+"\n"+'</pre>', 1000
-      @tualoGitContextView.getStatus  @getRepository().getWorkingDirectory(),shortFilePath
+    if @getRepository()
+      options =
+        cwd: @getRepository().getWorkingDirectory()
+        timeout: 30000
+      shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length-1
+      exec 'echo "'+shortFilePath+'" >> .gitignore',options, (err,stdout,stderr) =>
+        if err
+          @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+        else if stderr
+          @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
+        else
+          @showMessage '<pre>'+'added to .gitignore'+"\n"+'</pre>', 1000
+        @tualoGitContextView.getStatus  @getRepository().getWorkingDirectory(),shortFilePath
 
   ignore: ->
-    @showMessage 'ignoring ...'
-    fileName = @getCurrentFile()
-    if fileName!=null
-      if typeof @tualoGitContextView.statusNew[fileName] == 'object'
-        @gitIgnore fileName
+    if @getRepository()
+      @showMessage 'ignoring ...'
+      fileName = @getCurrentFile()
+      if fileName!=null
+        if typeof @tualoGitContextView.statusNew[fileName] == 'object'
+          @gitIgnore fileName
+        else
+          @showMessage 'can\'t be ignored ...', 5000
       else
-        @showMessage 'can\'t be ignored ...', 5000
-    else
-      @showMessage 'only files are supported', 5000
+        @showMessage 'only files are supported', 5000
 
 
 
 
 
   gitReset: (fileName)->
-    options =
-      cwd: @getRepository().getWorkingDirectory()
-      timeout: 30000
-    shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
+    if @getRepository()
+      options =
+        cwd: @getRepository().getWorkingDirectory()
+        timeout: 30000
+      shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
 
-    exec 'git reset HEAD '+shortFilePath+'',options, (err,stdout,stderr) =>
-      @showMessage 'reset to HEAD'
-      if err
-        @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
-      else if stderr
-        @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
-      else
-        @showMessage '<pre>'+'file was unstaged'+"\n"+'</pre>', 1000
-      @tualoGitContextView.gitStatus shortFilePath
+      exec 'git reset HEAD '+shortFilePath+'',options, (err,stdout,stderr) =>
+        @showMessage 'reset to HEAD'
+        if err
+          @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+        else if stderr
+          @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
+        else
+          @showMessage '<pre>'+'file was unstaged'+"\n"+'</pre>', 1000
+        @tualoGitContextView.gitStatus shortFilePath
 
   reset: ->
-    @showMessage 'resetting ...'
-    fileName = @getCurrentFile()
-    if fileName!=null
-      if typeof @tualoGitContextView.statusChanged[fileName] == 'object'
-        @gitReset fileName
-      else if typeof @tualoGitContextView.statusStaged[fileName] == 'object'
-        @gitReset fileName
+    if @getRepository()
+      @showMessage 'resetting ...'
+      fileName = @getCurrentFile()
+      if fileName!=null
+        if typeof @tualoGitContextView.statusChanged[fileName] == 'object'
+          @gitReset fileName
+        else if typeof @tualoGitContextView.statusStaged[fileName] == 'object'
+          @gitReset fileName
+        else
+          @showMessage 'can\'t be resetted ...'
       else
-        @showMessage 'can\'t be resetted ...'
-    else
-      @showMessage 'only files are supported'
+        @showMessage 'only files are supported'
 
 
   gitStatus: (fileOrPath) ->
-    options =
-      cwd: @getRepository().getWorkingDirectory()
-      timeout: 30000
-    shortFilePath = fileOrPath.substring @getRepository().getWorkingDirectory().length+1
-    exec 'git status '+shortFilePath,options, (err,stdout,stderr) =>
-      atom.confirm
-        message: 'GIT Status'
-        detailedMessage: stdout
-        buttons: ['OK']
+    if @getRepository()
+      options =
+        cwd: @getRepository().getWorkingDirectory()
+        timeout: 30000
+      shortFilePath = fileOrPath.substring @getRepository().getWorkingDirectory().length+1
+      exec 'git status '+shortFilePath,options, (err,stdout,stderr) =>
+        atom.confirm
+          message: 'GIT Status'
+          detailedMessage: stdout
+          buttons: ['OK']
   status: ->
-    @showMessage 'retrieving status ...',1000
-    fileName = @getCurrentFile()
-    pathName = @getCurrentPath()
-    if fileName!=null
-      @gitStatus fileName
-    else if pathName!=null
-      @gitStatus pathName
-    else
-      @showMessage 'only files or paths are supported'
+    if @getRepository()
+      @showMessage 'retrieving status ...',1000
+      fileName = @getCurrentFile()
+      pathName = @getCurrentPath()
+      if fileName!=null
+        @gitStatus fileName
+      else if pathName!=null
+        @gitStatus pathName
+      else
+        @showMessage 'only files or paths are supported'
 
 
 
 
   gitCommit: (fileName)->
-    options =
-      cwd: @getRepository().getWorkingDirectory()
-      timeout: 30000
-    shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
-    @tualoGitContextView.setCommitCallback null
-    exec 'git commit '+shortFilePath+' -F '+@tualoGitContextView.getCommitFilePath(),options, (err,stdout,stderr) =>
-      if err
-        @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
-      else if stderr
-        @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
-      else
-        @showMessage '<pre>'+'commited'+"\n"+'</pre>', 1000
-      fs.unlink @tualoGitContextView.getCommitFilePath()
-      @tualoGitContextView.gitStatus shortFilePath
+    if @getRepository()
+      options =
+        cwd: @getRepository().getWorkingDirectory()
+        timeout: 30000
+      shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
+      @tualoGitContextView.setCommitCallback null
+      exec 'git commit '+shortFilePath+' -F '+@tualoGitContextView.getCommitFilePath(),options, (err,stdout,stderr) =>
+        if err
+          @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+        else if stderr
+          @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
+        else
+          @showMessage '<pre>'+'commited'+"\n"+'</pre>', 1000
+        fs.unlink @tualoGitContextView.getCommitFilePath()
+        @tualoGitContextView.gitStatus shortFilePath
 
   commit: ->
-    #@showMessage 'commiting ...'
-    fileName = @getCurrentFile()
-    if fileName!=null
-      if typeof @tualoGitContextView.statusStaged[fileName] == 'object'
-        atom.workspace.open @tualoGitContextView.getCommitFilePath()
-        ctx = @tualoGitContextView
-        me = @
-        @tualoGitContextView.setCommitCallback () ->
-          me.gitCommit fileName
+    if @getRepository()
+      fileName = @getCurrentFile()
+      if fileName!=null
+        if typeof @tualoGitContextView.statusStaged[fileName] == 'object'
+          atom.workspace.open @tualoGitContextView.getCommitFilePath()
+          ctx = @tualoGitContextView
+          me = @
+          @tualoGitContextView.setCommitCallback () ->
+            me.gitCommit fileName
+        else
+          @showMessage 'there is nothing on stage ...'
       else
-        @showMessage 'there is nothing on stage ...'
-    else
-      @showMessage 'only files are supported'
+        @showMessage 'only files are supported'
 
 
   gitCommit: (fileName)->
-    options =
-      cwd: @getRepository().getWorkingDirectory()
-      timeout: 30000
-    shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
-    @tualoGitContextView.setCommitCallback null
-    exec 'git commit '+shortFilePath+' -F '+@tualoGitContextView.getCommitFilePath(),options, (err,stdout,stderr) =>
-      if err
-        @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
-      else if stderr
-        @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
-      else
-        @showMessage '<pre>'+'commited'+"\n"+'</pre>', 1000
-      fs.unlink @tualoGitContextView.getCommitFilePath()
-      @tualoGitContextView.gitStatus shortFilePath
+    if @getRepository()
+      options =
+        cwd: @getRepository().getWorkingDirectory()
+        timeout: 30000
+      shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
+      @tualoGitContextView.setCommitCallback null
+      exec 'git commit '+shortFilePath+' -F '+@tualoGitContextView.getCommitFilePath(),options, (err,stdout,stderr) =>
+        if err
+          @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+        else if stderr
+          @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
+        else
+          @showMessage '<pre>'+'commited'+"\n"+'</pre>', 1000
+        fs.unlink @tualoGitContextView.getCommitFilePath()
+        @tualoGitContextView.gitStatus shortFilePath
 
 
 
@@ -253,35 +263,37 @@ module.exports =
 
 
   gitRemove: (fileName)->
-    options =
-      cwd: @getRepository().getWorkingDirectory()
-      timeout: 30000
-    shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
+    if @getRepository()
+      options =
+        cwd: @getRepository().getWorkingDirectory()
+        timeout: 30000
+      shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
 
-    exec 'git rm --cached '+shortFilePath+'',options, (err,stdout,stderr) =>
-      @showMessage 'reset to HEAD'
-      if err
-        @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
-      else if stderr
-        @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
-      else
-        @showMessage '<pre>'+'file was unstaged'+"\n"+'</pre>', 1000
-      @tualoGitContextView.gitStatus shortFilePath
+      exec 'git rm --cached '+shortFilePath+'',options, (err,stdout,stderr) =>
+        @showMessage 'reset to HEAD'
+        if err
+          @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+        else if stderr
+          @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
+        else
+          @showMessage '<pre>'+'file was unstaged'+"\n"+'</pre>', 1000
+        @tualoGitContextView.gitStatus shortFilePath
 
   remove: ->
-    @showMessage 'removing ...'
-    fileName = @getCurrentFile()
-    if fileName!=null
-      if typeof @tualoGitContextView.statusChanged[fileName] == 'object'
-        @gitRemove fileName
-      else if typeof @tualoGitContextView.statusStaged[fileName] == 'object'
-        @gitRemove fileName
-      else if typeof @tualoGitContextView.statusClean[fileName] == 'object'
-        @gitRemove fileName
+    if @getRepository()
+      @showMessage 'removing ...'
+      fileName = @getCurrentFile()
+      if fileName!=null
+        if typeof @tualoGitContextView.statusChanged[fileName] == 'object'
+          @gitRemove fileName
+        else if typeof @tualoGitContextView.statusStaged[fileName] == 'object'
+          @gitRemove fileName
+        else if typeof @tualoGitContextView.statusClean[fileName] == 'object'
+          @gitRemove fileName
+        else
+          @showMessage 'this file isn\'t on your index'
       else
-        @showMessage 'this file isn\'t on your index'
-    else
-      @showMessage 'only files are supported'
+        @showMessage 'only files are supported'
 
 
 
@@ -289,24 +301,26 @@ module.exports =
 
 
   gitRevert: ()->
-    options =
-      cwd: @getRepository().getWorkingDirectory()
-      timeout: 30000
-    exec 'git revert HEAD',options, (err,stdout,stderr) =>
-      @showMessage 'revert to HEAD'
-      if err
-        @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
-      else if stderr
-        @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
-      else
-        @showMessage '<pre>'+'reverted'+"\n"+'</pre>', 1000
-      @tualoGitContextView.refreshTree()
+    if @getRepository()
+      options =
+        cwd: @getRepository().getWorkingDirectory()
+        timeout: 30000
+      exec 'git revert HEAD',options, (err,stdout,stderr) =>
+        @showMessage 'revert to HEAD'
+        if err
+          @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+        else if stderr
+          @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
+        else
+          @showMessage '<pre>'+'reverted'+"\n"+'</pre>', 1000
+        @tualoGitContextView.refreshTree()
 
   revert: ->
-    atom.confirm
-        message: "You sure?"
-        buttons:
-          Cancel: =>
+    if @getRepository()
+      atom.confirm
+          message: "You sure?"
+          buttons:
+            Cancel: =>
 
-          Revert: =>
-            @gitRevert()
+            Revert: =>
+              @gitRevert()

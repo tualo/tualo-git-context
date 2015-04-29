@@ -35,18 +35,19 @@ class TualoGitContextView
     @myDisposables = []
 
     atom.workspace.onDidOpen (event) =>
-      shortFilePath = event.uri.substring @getRepository().getWorkingDirectory().length+1
-      @gitStatus shortFilePath
+      if @getRepository()
+        shortFilePath = event.uri.substring @getRepository().getWorkingDirectory().length+1
+        @gitStatus shortFilePath
 
     atom.workspace.observeTextEditors (editor) =>
-
-      @myDisposables.push editor.onDidSave (event) =>
-        if event.path == @commitMessageFilePath
-          atom.workspace.destroyActivePaneItem()
-          if typeof @commitMsgCallback == 'function'
-            @commitMsgCallback()
-        shortFilePath = event.path.substring @getRepository().getWorkingDirectory().length+1
-        @gitStatus shortFilePath
+      if @getRepository()
+        @myDisposables.push editor.onDidSave (event) =>
+          if event.path == @commitMessageFilePath
+            atom.workspace.destroyActivePaneItem()
+            if typeof @commitMsgCallback == 'function'
+              @commitMsgCallback()
+          shortFilePath = event.path.substring @getRepository().getWorkingDirectory().length+1
+          @gitStatus shortFilePath
 
     @refreshTree()
 
@@ -60,8 +61,8 @@ class TualoGitContextView
 
   # Tear down any state and detach
   destroy: ->
-    #for i in [0...myDisposables.length]
-    #  @myDisposables[i].dispose()
+    for i in [0...@myDisposables.length]
+      @myDisposables[i].dispose()
     @messageElement.remove()
     @detach()
 
@@ -76,69 +77,70 @@ class TualoGitContextView
     @commitMsgCallback = cb
 
   gitStatus: (fileName)->
-    longName = @getRepository().getWorkingDirectory()+'/'+fileName
-    options =
-      cwd: @getRepository().getWorkingDirectory()
-      timeout: 30000
-    exec 'git status '+fileName,options, (err,stdout,stderr) =>
-      lines = stdout.split("\n")
-      state = 0
-      for i in [0...lines.length]
-        p = lines[i].indexOf(":")
-        if state == 3
-          fname = lines[i].replace(/\s/g,'')
-        else
-          fstate = lines[i].substring(0,p).replace(/\s/g,'')
-          fname = lines[i].substring(p+1).replace(/\s/g,'')
-        if (lines[i].indexOf("nothing to commit, working directory clean")>=0)
-          state=0
-        if (lines[i].indexOf("Changes to be committed:")>=0)
-          state=1
-        if (lines[i].indexOf("Changes not staged for commit:")>=0)
-          state=2
-        if (lines[i].indexOf("Untracked files:")>=0)
-          state=3
-          i++
-      entryNode = document.querySelector('span[data-path="'+longName+'"]')
-      if typeof entryNode != 'undefined' && entryNode != null
-
-        delete  @statusClean[longName];
-        delete  @statusIgnored[longName];
-        delete  @statusNew[longName];
-        delete  @statusChanged[longName];
-        delete  @statusStaged[longName];
-
-        oldNames = entryNode.className.split(' ')
-        newNames = []
-        for o in [0...oldNames.length]
-          if oldNames[o] == 'tualo-git-context-nothing'
-          else if oldNames[o] == 'tualo-git-context-new'
-          else if oldNames[o] == 'tualo-git-context-staged'
-          else if oldNames[o] == 'tualo-git-context-changed'
+    if @getRepository()
+      longName = @getRepository().getWorkingDirectory()+'/'+fileName
+      options =
+        cwd: @getRepository().getWorkingDirectory()
+        timeout: 30000
+      exec 'git status '+fileName,options, (err,stdout,stderr) =>
+        lines = stdout.split("\n")
+        state = 0
+        for i in [0...lines.length]
+          p = lines[i].indexOf(":")
+          if state == 3
+            fname = lines[i].replace(/\s/g,'')
           else
-            newNames.push(oldNames[o])
+            fstate = lines[i].substring(0,p).replace(/\s/g,'')
+            fname = lines[i].substring(p+1).replace(/\s/g,'')
+          if (lines[i].indexOf("nothing to commit, working directory clean")>=0)
+            state=0
+          if (lines[i].indexOf("Changes to be committed:")>=0)
+            state=1
+          if (lines[i].indexOf("Changes not staged for commit:")>=0)
+            state=2
+          if (lines[i].indexOf("Untracked files:")>=0)
+            state=3
+            i++
+        entryNode = document.querySelector('span[data-path="'+longName+'"]')
+        if typeof entryNode != 'undefined' && entryNode != null
 
-        if state == 0
-          @statusClean[longName] =
-            entryNode: entryNode
-          newNames.push('tualo-git-context-nothing')
+          delete  @statusClean[longName];
+          delete  @statusIgnored[longName];
+          delete  @statusNew[longName];
+          delete  @statusChanged[longName];
+          delete  @statusStaged[longName];
 
-        if state == 1
-          @statusStaged[longName] =
-            entryNode: entryNode
-          newNames.push('tualo-git-context-staged')
+          oldNames = entryNode.className.split(' ')
+          newNames = []
+          for o in [0...oldNames.length]
+            if oldNames[o] == 'tualo-git-context-nothing'
+            else if oldNames[o] == 'tualo-git-context-new'
+            else if oldNames[o] == 'tualo-git-context-staged'
+            else if oldNames[o] == 'tualo-git-context-changed'
+            else
+              newNames.push(oldNames[o])
 
-        if state == 2
-          @statusChanged[longName] =
-            entryNode: entryNode
-          newNames.push('tualo-git-context-changed')
+          if state == 0
+            @statusClean[longName] =
+              entryNode: entryNode
+            newNames.push('tualo-git-context-nothing')
 
-        if state == 3
-          @statusNew[longName] =
-            entryNode: entryNode
-          newNames.push('tualo-git-context-new')
+          if state == 1
+            @statusStaged[longName] =
+              entryNode: entryNode
+            newNames.push('tualo-git-context-staged')
 
-        entryNode.className = newNames.join(' ')
+          if state == 2
+            @statusChanged[longName] =
+              entryNode: entryNode
+            newNames.push('tualo-git-context-changed')
+
+          if state == 3
+            @statusNew[longName] =
+              entryNode: entryNode
+            newNames.push('tualo-git-context-new')
+
+          entryNode.className = newNames.join(' ')
 
   refreshClean: (directory) ->
 
@@ -164,69 +166,72 @@ class TualoGitContextView
 
 
   refreshTree: (dir) ->
-    gitdir = @getRepository().getWorkingDirectory()
-    options =
-      cwd: gitdir
-      timeout: 30000
-    exec 'git status',options, (err,stdout,stderr) =>
-      lines = stdout.split("\n")
-      state = 0
-      for i in [0...lines.length]
-        p = lines[i].indexOf(":")
-        fname=''
-        fstate=''
-        if state == 3
-          fname = lines[i].replace(/\s/g,'')
-        else
-          fstate = lines[i].substring(0,p).replace(/\s/g,'')
-          fname = lines[i].substring(p+1).replace(/\s/g,'')
-        if (lines[i].indexOf("nothing to commit, working directory clean")>=0)
-          state=0
-        if (lines[i].indexOf("Changes to be committed:")>=0)
-          state=1
-        if (lines[i].indexOf("Changes not staged for commit:")>=0)
-          state=2
-        if (lines[i].indexOf("Untracked files:")>=0)
-          state=3
-          i++
-        if (state==3 || fstate!='') and
-        lines[i].indexOf("\t")==0
-          longName = gitdir + '/' + fname
-          entryNode = document.querySelector('span[data-path="'+longName+'"]')
-          if typeof entryNode != 'undefined' && entryNode != null
+    if @getRepository()
+      gitdir = @getRepository().getWorkingDirectory()
+      options =
+        cwd: gitdir
+        timeout: 30000
+      exec 'git status',options, (err,stdout,stderr) =>
+        lines = stdout.split("\n")
+        state = 0
+        for i in [0...lines.length]
+          p = lines[i].indexOf(":")
+          fname=''
+          fstate=''
+          if state == 3
+            fname = lines[i].replace(/\s/g,'')
+          else
+            fstate = lines[i].substring(0,p).replace(/\s/g,'')
+            fname = lines[i].substring(p+1).replace(/\s/g,'')
+          if (lines[i].indexOf("nothing to commit, working directory clean")>=0)
+            state=0
+          if (lines[i].indexOf("Changes to be committed:")>=0)
+            state=1
+          if (lines[i].indexOf("Changes not staged for commit:")>=0)
+            state=2
+          if (lines[i].indexOf("Untracked files:")>=0)
+            state=3
+            i++
+          if (state==3 || fstate!='') and
+          lines[i].indexOf("\t")==0
+            longName = gitdir + '/' + fname
+            entryNode = document.querySelector('span[data-path="'+longName+'"]')
+            if typeof entryNode != 'undefined' && entryNode != null
 
-            delete  @statusClean[longName];
-            delete  @statusIgnored[longName];
-            delete  @statusNew[longName];
-            delete  @statusChanged[longName];
-            delete  @statusStaged[longName];
+              delete  @statusClean[longName];
+              delete  @statusIgnored[longName];
+              delete  @statusNew[longName];
+              delete  @statusChanged[longName];
+              delete  @statusStaged[longName];
 
-            oldNames = entryNode.className.split(' ')
-            newNames = []
-            for o in [0...oldNames.length]
-              if oldNames[o] == 'tualo-git-context-nothing'
-              else if oldNames[o] == 'tualo-git-context-new'
-              else if oldNames[o] == 'tualo-git-context-staged'
-              else if oldNames[o] == 'tualo-git-context-changed'
-              else
-                newNames.push(oldNames[o])
+              oldNames = entryNode.className.split(' ')
+              newNames = []
+              for o in [0...oldNames.length]
+                if oldNames[o] == 'tualo-git-context-nothing'
+                else if oldNames[o] == 'tualo-git-context-new'
+                else if oldNames[o] == 'tualo-git-context-staged'
+                else if oldNames[o] == 'tualo-git-context-changed'
+                else
+                  newNames.push(oldNames[o])
 
 
-            if state == 1
-              @statusStaged[longName] =
-                entryNode: entryNode
-              newNames.push('tualo-git-context-staged')
+              if state == 1
+                @statusStaged[longName] =
+                  entryNode: entryNode
+                newNames.push('tualo-git-context-staged')
 
-            if state == 2
-              @statusChanged[longName] =
-                entryNode: entryNode
-              newNames.push('tualo-git-context-changed')
+              if state == 2
+                @statusChanged[longName] =
+                  entryNode: entryNode
+                newNames.push('tualo-git-context-changed')
 
-            if state == 3
-              @statusNew[longName] =
-                entryNode: entryNode
-              newNames.push('tualo-git-context-new')
+              if state == 3
+                @statusNew[longName] =
+                  entryNode: entryNode
+                newNames.push('tualo-git-context-new')
 
-            entryNode.className = newNames.join(' ')
+              entryNode.className = newNames.join(' ')
 
-      @refreshClean atom.project.getRootDirectory()
+        root = atom.project.getDirectories()[0]
+        if root
+          @refreshClean root
