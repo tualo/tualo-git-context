@@ -28,6 +28,75 @@ module.exports =
     @subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:remove", => @remove()
     @subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:revert", => @revert()
 
+    console.log 'ok*'
+    status =
+        label: 'Status',
+        command:'tualo-git-context:status',
+        shouldDisplay: (event)->
+          console.log('---',event)
+          false
+    me = @
+
+
+    atom.contextMenu.add {
+      '.tree-view': [{
+        label: 'Git',
+        shouldDisplay: (event)->
+          pathName = event.target.dataset.path
+          if pathName
+          else
+            elem = event.target.querySelector('span[data-path]')
+            pathName = elem.getAttribute('data-path')
+
+          if pathName
+            shortFilePath = pathName.substring me.getRepository().getWorkingDirectory().length+1
+
+            me.gitSubMenu.submenu = [];
+
+            if typeof me.tualoGitContextView.statusNew[pathName] == 'object' or
+               typeof me.tualoGitContextView.statusChanged[pathName] == 'object'
+              me.gitSubMenu.submenu.push {label: 'Stage (single file)', command:'tualo-git-context:staging'}
+
+            if typeof me.tualoGitContextView.statusStaged[pathName] == 'object'
+              me.gitSubMenu.submenu.push {label: 'Commit (single file)', command:'tualo-git-context:commit'}
+
+            me.gitSubMenu.submenu.push {label: '-',type: 'separator'}
+            me.gitSubMenu.submenu.push {label: 'Status (single file)', command:'tualo-git-context:status'}
+            me.gitSubMenu.submenu.push {label: '-',type: 'separator'}
+            me.gitSubMenu.submenu.push {label: 'Ignore (single file)', command:'tualo-git-context:ignore'}
+            me.gitSubMenu.submenu.push {label: '-',type: 'separator'}
+
+            #if typeof me.tualoGitContextView.statusNew[pathName] == 'undefined'
+            #  me.gitSubMenu.submenu.push {label: 'Checkout HEAD (single file)', command:'tualo-git-context:checkout'}
+
+            me.gitSubMenu.submenu.push {label: 'Remove (single file)', command:'tualo-git-context:remove'}
+
+            if typeof me.tualoGitContextView.statusStaged[pathName] == 'object'
+              me.gitSubMenu.submenu.push {label: 'Reset (single file)', command:'tualo-git-context:reset'}
+
+            me.gitSubMenu.submenu.push {label: 'Revert (all files)', command:'tualo-git-context:revert'}
+            true
+          else
+            false
+        submenu: [
+          {label: 'Stage (single file)', command:'tualo-git-context:staging'},
+          {label: 'Commit (single file)', command:'tualo-git-context:commit'},
+          {label: 'Status (single file)', command:'tualo-git-context:status'},
+          {label: 'Remove (single file)', command:'tualo-git-context:remove'}
+          {label: 'Reset (single file)', command:'tualo-git-context:reset'}
+          {label: 'Revert (all files)', command:'tualo-git-context:revert'}
+          {label: 'Ignore (single file)', command:'tualo-git-context:ignore'}
+        ]
+      }]
+    }
+
+
+    @gitSubMenu = null
+    for item in atom.contextMenu.itemSets
+      if item.items[0].label=='Git'
+        console.log item.items[0].submenu
+        @gitSubMenu = item.items[0] #item.items[0].submenu
+    # ContextMenuManager
 
   deactivate: ->
     @modalPanel.destroy()

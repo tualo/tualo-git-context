@@ -1,7 +1,10 @@
-## 0.8.0
-* fixed no working directory 
+## 0.6.3
+* dynamic context menu
 
-## 0.7.0
+## 0.6.2
+* fixed no working directory
+
+## 0.6.1
 * fixed detach error
 
 ## 0.6.0

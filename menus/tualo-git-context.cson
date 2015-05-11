@@ -1,16 +1,16 @@
 # See https://atom.io/docs/latest/creating-a-package#menus for more details
-'context-menu':
-  '.overlayer':
-      'Enable tualo-git-context': 'tualo-git-context:toggle'
-  '.tree-view':
-    'git':
-      'stage': 'tualo-git-context:staging'
-      'commit': 'tualo-git-context:commit'
-      'status': 'tualo-git-context:status'
-      'unstage': 'tualo-git-context:reset'
-      'remove': 'tualo-git-context:remove'
-      'ignore': 'tualo-git-context:ignore'
-      'revert': 'tualo-git-context:revert'
+#'context-menu':
+#  '.overlayer':
+#      'Enable tualo-git-context': 'tualo-git-context:toggle'
+#  '.tree-view':
+#    'git':
+#      'stage': 'tualo-git-context:staging'
+#      'commit': 'tualo-git-context:commit'
+#      'status': 'tualo-git-context:status'
+#      'unstage': 'tualo-git-context:reset'
+#      'remove': 'tualo-git-context:remove'
+#      'ignore': 'tualo-git-context:ignore'
+#      'revert': 'tualo-git-context:revert'
 #'menu': [
 #  {
 #    'label': 'Packages'

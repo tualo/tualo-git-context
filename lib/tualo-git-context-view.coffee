@@ -11,6 +11,9 @@ module.exports =
 class TualoGitContextView
 
   constructor: (serializeState) ->
+
+
+
     @messageElement = document.createElement('div')
     @messageElement.classList.add('tualo-git-context')
     @message = document.createElement('div')
@@ -25,6 +28,7 @@ class TualoGitContextView
     @statusClean = {};
 
     @commitMsgCallback = null
+
 
 
     @commitMessageFilePath = '/tmp/.commitmessage'
