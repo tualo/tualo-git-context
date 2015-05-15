@@ -1,5 +1,8 @@
 ## 0.6.3
 * dynamic context menu
+* added checkout head, single file
+* fixed issue #17 <https://github.com/tualo/tualo-git-context/issues/17>
+* fixed issue #16 <https://github.com/tualo/tualo-git-context/issues/16>
 
 ## 0.6.2
 * fixed no working directory
