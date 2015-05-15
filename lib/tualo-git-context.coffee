@@ -8,9 +8,9 @@ path = require 'path'
 crypto = require 'crypto'
 
 module.exports =
-  configDefaults:
-    enableAutoActivation: true
-    autoActivationDelay: 1000
+  #configDefaults:
+  #  enableAutoActivation: true
+  #  autoActivationDelay: 1000
 
   tualoGitContextView: null
 
@@ -27,13 +27,12 @@ module.exports =
     @subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:commit", => @commit()
     @subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:remove", => @remove()
     @subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:revert", => @revert()
+    @subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:checkouthead", => @checkouthead()
 
-    console.log 'ok*'
     status =
         label: 'Status',
         command:'tualo-git-context:status',
         shouldDisplay: (event)->
-          console.log('---',event)
           false
     me = @
 
@@ -66,13 +65,14 @@ module.exports =
             me.gitSubMenu.submenu.push {label: 'Ignore (single file)', command:'tualo-git-context:ignore'}
             me.gitSubMenu.submenu.push {label: '-',type: 'separator'}
 
-            #if typeof me.tualoGitContextView.statusNew[pathName] == 'undefined'
-            #  me.gitSubMenu.submenu.push {label: 'Checkout HEAD (single file)', command:'tualo-git-context:checkout'}
 
             me.gitSubMenu.submenu.push {label: 'Remove (single file)', command:'tualo-git-context:remove'}
 
             if typeof me.tualoGitContextView.statusStaged[pathName] == 'object'
               me.gitSubMenu.submenu.push {label: 'Reset (single file)', command:'tualo-git-context:reset'}
+
+            if typeof me.tualoGitContextView.statusNew[pathName] == 'undefined'
+              me.gitSubMenu.submenu.push {label: 'Checkout HEAD (single file)', command:'tualo-git-context:checkouthead'}
 
             me.gitSubMenu.submenu.push {label: 'Revert (all files)', command:'tualo-git-context:revert'}
             true
@@ -85,6 +85,7 @@ module.exports =
           {label: 'Remove (single file)', command:'tualo-git-context:remove'}
           {label: 'Reset (single file)', command:'tualo-git-context:reset'}
           {label: 'Revert (all files)', command:'tualo-git-context:revert'}
+          {label: 'Checkout HEAD (single file)', command:'tualo-git-context:checkouthead'}
           {label: 'Ignore (single file)', command:'tualo-git-context:ignore'}
         ]
       }]
@@ -94,7 +95,6 @@ module.exports =
     @gitSubMenu = null
     for item in atom.contextMenu.itemSets
       if item.items[0].label=='Git'
-        console.log item.items[0].submenu
         @gitSubMenu = item.items[0] #item.items[0].submenu
     # ContextMenuManager
 
@@ -387,9 +387,40 @@ module.exports =
   revert: ->
     if @getRepository()
       atom.confirm
-          message: "You sure?"
+          message: "All not commited changes will be lost. Are you sure?"
           buttons:
             Cancel: =>
 
             Revert: =>
               @gitRevert()
+
+
+
+  gitCheckouthead: (fileName)->
+    if @getRepository()
+      options =
+        cwd: @getRepository().getWorkingDirectory()
+        timeout: 30000
+      shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
+
+      exec 'git checkout HEAD '+shortFilePath+'',options, (err,stdout,stderr) =>
+        @showMessage 'reset to HEAD'
+        if err
+          @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+        else if stderr
+          @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
+        else
+          @showMessage '<pre>'+'checked out'+"\n"+'</pre>', 1000
+        @tualoGitContextView.gitStatus shortFilePath
+
+
+  checkouthead: ->
+    if @getRepository()
+      fileName = @getCurrentFile()
+      atom.confirm
+          message: "All not commited changes on this file will be lost. Are you sure?"
+          buttons:
+            Cancel: =>
+
+            Checkout: =>
+              @gitCheckouthead fileName
