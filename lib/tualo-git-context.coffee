@@ -48,34 +48,37 @@ module.exports =
             pathName = elem.getAttribute('data-path')
 
           if pathName
-            shortFilePath = pathName.substring me.getRepository().getWorkingDirectory().length+1
+            if (me.getRepository())
+              shortFilePath = pathName.substring me.getRepository().getWorkingDirectory().length+1
 
-            me.gitSubMenu.submenu = [];
+              me.gitSubMenu.submenu = [];
 
-            if typeof me.tualoGitContextView.statusNew[pathName] == 'object' or
-               typeof me.tualoGitContextView.statusChanged[pathName] == 'object'
-              me.gitSubMenu.submenu.push {label: 'Stage (single file)', command:'tualo-git-context:staging'}
+              if typeof me.tualoGitContextView.statusNew[pathName] == 'object' or
+                 typeof me.tualoGitContextView.statusChanged[pathName] == 'object'
+                me.gitSubMenu.submenu.push {label: 'Stage (single file)', command:'tualo-git-context:staging'}
 
-            if typeof me.tualoGitContextView.statusStaged[pathName] == 'object'
-              me.gitSubMenu.submenu.push {label: 'Commit (single file)', command:'tualo-git-context:commit'}
+              if typeof me.tualoGitContextView.statusStaged[pathName] == 'object'
+                me.gitSubMenu.submenu.push {label: 'Commit (single file)', command:'tualo-git-context:commit'}
 
-            me.gitSubMenu.submenu.push {label: '-',type: 'separator'}
-            me.gitSubMenu.submenu.push {label: 'Status (single file)', command:'tualo-git-context:status'}
-            me.gitSubMenu.submenu.push {label: '-',type: 'separator'}
-            me.gitSubMenu.submenu.push {label: 'Ignore (single file)', command:'tualo-git-context:ignore'}
-            me.gitSubMenu.submenu.push {label: '-',type: 'separator'}
+              me.gitSubMenu.submenu.push {label: '-',type: 'separator'}
+              me.gitSubMenu.submenu.push {label: 'Status (single file)', command:'tualo-git-context:status'}
+              me.gitSubMenu.submenu.push {label: '-',type: 'separator'}
+              me.gitSubMenu.submenu.push {label: 'Ignore (single file)', command:'tualo-git-context:ignore'}
+              me.gitSubMenu.submenu.push {label: '-',type: 'separator'}
 
 
-            me.gitSubMenu.submenu.push {label: 'Remove (single file)', command:'tualo-git-context:remove'}
+              me.gitSubMenu.submenu.push {label: 'Remove (single file)', command:'tualo-git-context:remove'}
 
-            if typeof me.tualoGitContextView.statusStaged[pathName] == 'object'
-              me.gitSubMenu.submenu.push {label: 'Reset (single file)', command:'tualo-git-context:reset'}
+              if typeof me.tualoGitContextView.statusStaged[pathName] == 'object'
+                me.gitSubMenu.submenu.push {label: 'Reset (single file)', command:'tualo-git-context:reset'}
 
-            if typeof me.tualoGitContextView.statusNew[pathName] == 'undefined'
-              me.gitSubMenu.submenu.push {label: 'Checkout HEAD (single file)', command:'tualo-git-context:checkouthead'}
+              if typeof me.tualoGitContextView.statusNew[pathName] == 'undefined'
+                me.gitSubMenu.submenu.push {label: 'Checkout HEAD (single file)', command:'tualo-git-context:checkouthead'}
 
-            me.gitSubMenu.submenu.push {label: 'Revert (all files)', command:'tualo-git-context:revert'}
-            true
+              me.gitSubMenu.submenu.push {label: 'Revert (all files)', command:'tualo-git-context:revert'}
+              true
+            else
+              false
           else
             false
         submenu: [

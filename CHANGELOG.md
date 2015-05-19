@@ -1,3 +1,6 @@
+## 0.6.4
+* fixed Cannot read property 'getWorkingDirectory' of null
+
 ## 0.6.3
 * dynamic context menu
 * added checkout head, single file
