@@ -46,7 +46,8 @@ class TualoGitContextView
     atom.workspace.observeTextEditors (editor) =>
       if @getRepository()
         @myDisposables.push editor.onDidSave (event) =>
-          if event.path == @commitMessageFilePath
+          if event.path == @commitMessageFilePath or
+             event.path == '/private'+@commitMessageFilePath
             atom.workspace.destroyActivePaneItem()
             if typeof @commitMsgCallback == 'function'
               @commitMsgCallback()

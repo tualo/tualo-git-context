@@ -1,3 +1,9 @@
+## 0.6.5
+* fixed issue #18 <https://github.com/tualo/tualo-git-context/issues/18>
+* added path support for git rm command
+* fixed git ignore path problem
+* added comment lines to commit message window
+
 ## 0.6.4
 * fixed Cannot read property 'getWorkingDirectory' of null
 
