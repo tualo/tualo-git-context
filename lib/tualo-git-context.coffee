@@ -335,7 +335,7 @@ module.exports =
         timeout: 30000
         maxBuffer: 1048576
       cmd = 'status'
-      if entries.length == 1 and not fs.lstatSync(entries[0]).isDirectory()
+      if entries.length == 1 and not fs.lstatSync( path.join( @getRepository().getWorkingDirectory(),entries[0]) ).isDirectory()
         cmd = 'diff --cached'
       exec 'git '+cmd+' '+entries.join(' '),options, (err,stdout,stderr) =>
         lines = "\n#"+stdout.split("\n").join("\n#")

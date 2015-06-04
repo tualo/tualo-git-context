@@ -1,3 +1,6 @@
+## 0.6.7
+* fixed issue single file commit error lstat
+
 ## 0.6.6
 * fixed issue locked index message
 * increase maxBuffer to 1KiB
