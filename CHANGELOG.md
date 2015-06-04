@@ -1,3 +1,8 @@
+## 0.6.6
+* fixed issue locked index message
+* increase maxBuffer to 1KiB
+* added multiple selection support for staging, status and commits
+
 ## 0.6.5
 * fixed issue #18 <https://github.com/tualo/tualo-git-context/issues/18>
 * added path support for git rm command

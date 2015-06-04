@@ -7,6 +7,7 @@ fs = require 'fs'
 path = require 'path'
 crypto = require 'crypto'
 
+
 module.exports =
   #configDefaults:
   #  enableAutoActivation: true
@@ -41,6 +42,8 @@ module.exports =
       '.tree-view': [{
         label: 'Git',
         shouldDisplay: (event)->
+          if typeof me.treeView == 'undefined'
+            me.treeView = me.getTreeView()
           pathName = event.target.dataset.path
           if pathName
           else
@@ -96,7 +99,6 @@ module.exports =
       }]
     }
 
-
     @gitSubMenu = null
     for item in atom.contextMenu.itemSets
       if item.items[0].label=='Git'
@@ -110,6 +112,23 @@ module.exports =
 
   serialize: ->
     tualoGitContextViewState: @tualoGitContextView.serialize()
+
+
+  getTreeView: ->
+    result = null
+    panels = atom.workspace.getLeftPanels()
+    panels = panels.concat atom.workspace.getTopPanels()
+    panels = panels.concat atom.workspace.getRightPanels()
+    panels = panels.concat atom.workspace.getBottomPanels()
+
+    (result = item.item for item in panels when typeof item.item.getSelectedEntries == 'function' and typeof item.item.getActivePath == 'function' )
+    result
+
+    #console.log panels[0].querySelector('div.tree-view-resizer.tool-panel')
+    #atom.workspace.getLeftPanels()[0].item.getSelectedEntries()
+    #div.tree-view-resizer.tool-panel
+    #  getCurrentTreeItemPath: ->
+    #    elem = atom.contextMenu.activeElement.querySelector('span[data-path]')
 
 
 
@@ -141,10 +160,11 @@ module.exports =
     else
       null
 
-
   getCurrentTreeItemPath: ->
     elem = atom.contextMenu.activeElement.querySelector('span[data-path]')
+    console.log atom.contextMenu.activeElement
     if elem==null
+
       atom.contextMenu.activeElement.getAttribute('data-path')
     else
       elem.getAttribute('data-path')
@@ -154,42 +174,42 @@ module.exports =
     if repos.length>0
       return repos[0]
 
+  getShortNames: (entries) ->
+    result = []
+    wd_length = @getRepository().getWorkingDirectory().length+1
+    for item in entries
+      name = ""
+      if typeof item.file == 'object'
+        name = item.file.path
+      if typeof item.directory == 'object'
+        name = item.directory.path
+      if name != ""
+        name = name.substring wd_length
+        if name == ""
+            name = "."
+        result.push name
+    result
 
-  gitAdd: (fileName) ->
+
+  gitAdd: (entries) ->
     if @getRepository()
       options =
         cwd: @getRepository().getWorkingDirectory()
         timeout: 30000
-      shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
-      if shortFilePath == ''
-        shortFilePath = '.'
-      exec 'git add '+shortFilePath,options, (err,stdout,stderr) =>
-
+        maxBuffer: 1048576
+      me = @
+      exec 'git add '+entries.join(' '),options, (err,stdout,stderr) =>
         if err
-          @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+          me.showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
         else if stderr
-          @showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
+          me.showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
         else
-          @showMessage '<pre>'+'file added to stage'+"\n"+'</pre>', 1000
-        @tualoGitContextView.gitStatus shortFilePath
+          me.showMessage '<pre>'+'file added to stage'+"\n"+'</pre>', 1000
+        (me.tualoGitContextView.gitStatus(entry) for entry in entries)
   staging: ->
     if @getRepository()
-      fileName = @getCurrentFile()
-      if not fileName?
-        fileName = @getCurrentPath()
-        type = 'path'
-      if fileName?
-        if typeof @tualoGitContextView.statusChanged[fileName] == 'object' or
-           typeof @tualoGitContextView.statusNew[fileName] == 'object' or
-           fs.lstatSync(fileName).isDirectory()
-          @gitAdd fileName
-        else if typeof @tualoGitContextView.statusStaged[fileName] == 'object'
-          @showMessage 'this file is allready staged ...', 3000
-        else
-          @showMessage 'there is nothing to stage ...', 3000
-      else
-        @showMessage 'only files are supported', 3000
-
+      entries = @getShortNames @treeView.getSelectedEntries()
+      @gitAdd entries
 
 
   gitIgnore: (fileName) ->
@@ -197,6 +217,7 @@ module.exports =
       options =
         cwd: @getRepository().getWorkingDirectory()
         timeout: 30000
+        maxBuffer: 1048576
       shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
       me = @
       exec 'echo "'+shortFilePath+'" >> .gitignore',options, (err,stdout,stderr) =>
@@ -229,6 +250,7 @@ module.exports =
       options =
         cwd: @getRepository().getWorkingDirectory()
         timeout: 30000
+        maxBuffer: 1048576
       shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
 
       exec 'git reset HEAD '+shortFilePath+'',options, (err,stdout,stderr) =>
@@ -256,40 +278,35 @@ module.exports =
         @showMessage 'only files are supported'
 
 
-  gitStatus: (fileOrPath) ->
+  gitStatus: (shortEntries) ->
     if @getRepository()
       options =
         cwd: @getRepository().getWorkingDirectory()
         timeout: 30000
-      shortFilePath = fileOrPath.substring @getRepository().getWorkingDirectory().length+1
-      exec 'git status '+shortFilePath,options, (err,stdout,stderr) =>
+        maxBuffer: 1048576
+      exec 'git status '+shortEntries.join(' '),options, (err,stdout,stderr) =>
         atom.confirm
           message: 'GIT Status'
           detailedMessage: stdout
           buttons: ['OK']
   status: ->
     if @getRepository()
-      @showMessage 'retrieving status ...',1000
-      fileName = @getCurrentFile()
-      pathName = @getCurrentPath()
-      if fileName!=null
-        @gitStatus fileName
-      else if pathName!=null
-        @gitStatus pathName
-      else
-        @showMessage 'only files or paths are supported'
+      entries = @getShortNames @treeView.getSelectedEntries()
+      @gitStatus entries
 
 
 
 
-  gitCommit: (fileName)->
+  gitCommit: (entries)->
     if @getRepository()
       options =
         cwd: @getRepository().getWorkingDirectory()
         timeout: 30000
-      shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
-      if shortFilePath == ''
-        shortFilePath = '.'
+        maxBuffer: 1048576
+      #shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
+      #if shortFilePath == ''
+      #  shortFilePath = '.'
+
       @tualoGitContextView.setCommitCallback null
       me = @
       msgdata = fs.readFileSync me.tualoGitContextView.getCommitFilePath()
@@ -297,49 +314,36 @@ module.exports =
       lines = msgdata.toString().split("\n")
       (msg.push(line) for line in lines when line.substring(0,1) != '#' )
       fs.writeFileSync me.tualoGitContextView.getCommitFilePath(),msg.join("\n")
-
-      exec 'git commit '+shortFilePath+' -F '+me.tualoGitContextView.getCommitFilePath(),options, (err,stdout,stderr) =>
-        if err
-          me.showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
-        else if stderr
-          me.showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
-        else
-          me.showMessage '<pre>'+'commited'+"\n"+'</pre>', 1000
-        fs.unlink me.tualoGitContextView.getCommitFilePath()
-        me.tualoGitContextView.gitStatus shortFilePath
+      cmt = ()  ->
+        exec 'git commit '+entries.join(' ')+' -F '+me.tualoGitContextView.getCommitFilePath(),options, (err,stdout,stderr) =>
+          if err
+            me.showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+          else if stderr
+            me.showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
+          else
+            me.showMessage '<pre>'+'commited'+"\n"+'</pre>', 1000
+          fs.unlink me.tualoGitContextView.getCommitFilePath()
+          (me.tualoGitContextView.gitStatus(entry) for entry in entries)
+      setTimeout cmt,500 # fixing .git/index.lock error
 
   commit: ->
     if @getRepository()
-      fileName = @getCurrentFile()
-      type = 'file';
-      fileName = @getCurrentFile()
-      if not fileName?
-        fileName = @getCurrentPath()
-        type = 'path'
-      if fileName?
-        if typeof @tualoGitContextView.statusStaged[fileName] == 'object' or
-           fs.lstatSync(fileName).isDirectory()
-
-          me = @
-          options =
-            cwd: @getRepository().getWorkingDirectory()
-            timeout: 30000
-
-          shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
-          cmd = 'status'
-          if type == 'file'
-            cmd = 'diff --cached'
-          exec 'git '+cmd+' '+shortFilePath,options, (err,stdout,stderr) =>
-            lines = "\n#"+stdout.split("\n").join("\n#")
-            fs.writeFileSync me.tualoGitContextView.getCommitFilePath(),lines
-            atom.workspace.open me.tualoGitContextView.getCommitFilePath()
-            ctx = me.tualoGitContextView
-            me.tualoGitContextView.setCommitCallback () ->
-              me.gitCommit fileName
-        else
-          @showMessage 'there is nothing on stage ...'
-      else
-        @showMessage 'only files are supported'
+      entries = @getShortNames @treeView.getSelectedEntries()
+      me = @
+      options =
+        cwd: @getRepository().getWorkingDirectory()
+        timeout: 30000
+        maxBuffer: 1048576
+      cmd = 'status'
+      if entries.length == 1 and not fs.lstatSync(entries[0]).isDirectory()
+        cmd = 'diff --cached'
+      exec 'git '+cmd+' '+entries.join(' '),options, (err,stdout,stderr) =>
+        lines = "\n#"+stdout.split("\n").join("\n#")
+        fs.writeFileSync me.tualoGitContextView.getCommitFilePath(),lines
+        atom.workspace.open me.tualoGitContextView.getCommitFilePath()
+        ctx = me.tualoGitContextView
+        me.tualoGitContextView.setCommitCallback () ->
+          me.gitCommit entries
 
 
 
@@ -348,6 +352,7 @@ module.exports =
       options =
         cwd: @getRepository().getWorkingDirectory()
         timeout: 30000
+        maxBuffer: 1048576
       shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
       opt = ''
       if type == 'path'
@@ -397,6 +402,7 @@ module.exports =
       options =
         cwd: @getRepository().getWorkingDirectory()
         timeout: 30000
+        maxBuffer: 1048576
       exec 'git revert HEAD',options, (err,stdout,stderr) =>
         @showMessage 'revert to HEAD'
         if err
@@ -425,6 +431,7 @@ module.exports =
         options =
           cwd: @getRepository().getWorkingDirectory()
           timeout: 30000
+          maxBuffer: 1048576
         shortFilePath = fileName.substring @getRepository().getWorkingDirectory().length+1
 
         if shortFilePath == ''
