@@ -188,13 +188,17 @@ class TualoGitContextView
           else
             fstate = lines[i].substring(0,p).replace(/\s/g,'')
             fname = lines[i].substring(p+1).replace(/\s/g,'')
-          if (lines[i].indexOf("nothing to commit, working directory clean")>=0)
+          if lines[i].indexOf("nothing to commit, working directory clean")>=0 or
+             lines[i].indexOf("nichts zu commiten, Arbeitsverzeichnis unverändert")>=0
             state=0
-          if (lines[i].indexOf("Changes to be committed:")>=0)
+          if lines[i].indexOf("Changes to be committed:")>=0 or
+             lines[i].indexOf("zum Commit vorgemerkte Änderungen:")>=0
             state=1
-          if (lines[i].indexOf("Changes not staged for commit:")>=0)
+          if lines[i].indexOf("Changes not staged for commit:")>=0 or
+             lines[i].indexOf("Änderungen, die nicht zum Commit vorgemerkt sind:")>=0
             state=2
-          if (lines[i].indexOf("Untracked files:")>=0)
+          if lines[i].indexOf("Untracked files:") >= 0 or
+             lines[i].indexOf("Unbeobachtete Dateien:") >= 0
             state=3
             i++
           if (state==3 || fstate!='') and

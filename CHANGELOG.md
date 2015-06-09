@@ -1,3 +1,6 @@
+## 0.6.8
+* added german git version support
+
 ## 0.6.7
 * fixed issue single file commit error lstat
 
