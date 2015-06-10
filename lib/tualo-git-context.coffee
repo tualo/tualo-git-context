@@ -227,7 +227,7 @@ module.exports =
           me.showMessage '<pre>'+'ERROR '+stderr+" "+stdout+'</pre>', 5000
         else
           me.showMessage '<pre>'+'added to .gitignore'+"\n"+'</pre>', 1000
-        me.tualoGitContextView.getStatus  me.getRepository().getWorkingDirectory(),shortFilePath
+        me.tualoGitContextView.gitStatus shortFilePath
 
   ignore: ->
     if @getRepository()

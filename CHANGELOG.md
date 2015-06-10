@@ -1,3 +1,6 @@
+## 0.6.9
+* fixed gitignore undefined function error
+
 ## 0.6.8
 * added german git version support
 
