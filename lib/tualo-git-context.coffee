@@ -30,6 +30,10 @@ module.exports =
     @subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:revert", => @revert()
     @subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:checkouthead", => @checkouthead()
 
+    @branchCMDS = {}
+
+
+
     status =
         label: 'Status',
         command:'tualo-git-context:status',
@@ -55,6 +59,18 @@ module.exports =
               shortFilePath = pathName.substring me.getRepository().getWorkingDirectory().length+1
 
               me.gitSubMenu.submenu = [];
+              branches = me.tualoGitContextView.branches
+
+              for name of branches
+                if typeof me.branchCMDS[name]=='undefined'
+                  me.branchCMDS[name]=true
+                  n = name+""
+                  me.subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:checkout-"+n, me.checkoutCMD(n)
+                  me.subscriptions.add atom.commands.add "atom-workspace","tualo-git-context:pushorigin-"+n, me.pushoriginCMD(n)
+
+
+              currentbranch = null
+              (currentbranch = name for name of branches when branches[name].current == true)
 
               if typeof me.tualoGitContextView.statusNew[pathName] == 'object' or
                  typeof me.tualoGitContextView.statusChanged[pathName] == 'object' or
@@ -66,7 +82,7 @@ module.exports =
                 me.gitSubMenu.submenu.push {label: 'Commit', command:'tualo-git-context:commit'}
 
               me.gitSubMenu.submenu.push {label: '-',type: 'separator'}
-              me.gitSubMenu.submenu.push {label: 'Status', command:'tualo-git-context:status'}
+              me.gitSubMenu.submenu.push {label: 'Status *'+currentbranch+'*', command:'tualo-git-context:status'}
               me.gitSubMenu.submenu.push {label: '-',type: 'separator'}
               me.gitSubMenu.submenu.push {label: 'Ignore', command:'tualo-git-context:ignore'}
               me.gitSubMenu.submenu.push {label: '-',type: 'separator'}
@@ -80,7 +96,16 @@ module.exports =
               if typeof me.tualoGitContextView.statusNew[pathName] == 'undefined'
                 me.gitSubMenu.submenu.push {label: 'Checkout HEAD', command:'tualo-git-context:checkouthead'}
 
+              branchessubmenu = []
+              ( branchessubmenu.push({label: 'Checkout '+name, command:'tualo-git-context:checkout-'+name }) for name of branches when branches[name].current != true)
+              me.gitSubMenu.submenu.push {label: 'Checkout', submenu: branchessubmenu}
+
               me.gitSubMenu.submenu.push {label: 'Revert (all files)', command:'tualo-git-context:revert'}
+              me.gitSubMenu.submenu.push {label: '-',type: 'separator'}
+
+              if me.tualoGitContextView.remote!=""
+                me.gitSubMenu.submenu.push {label: 'Push '+me.tualoGitContextView.remote+' '+currentbranch, command:'tualo-git-context:pushorigin-'+currentbranch}
+
               true
             else
               false
@@ -145,7 +170,6 @@ module.exports =
     @messageTimer = setTimeout(@hideMessage.bind(@), timeout)
 
 
-
   getCurrentFile: ->
     filePath = @getCurrentTreeItemPath()
     if fs.lstatSync(filePath).isDirectory()
@@ -162,7 +186,6 @@ module.exports =
 
   getCurrentTreeItemPath: ->
     elem = atom.contextMenu.activeElement.querySelector('span[data-path]')
-    console.log atom.contextMenu.activeElement
     if elem==null
 
       atom.contextMenu.activeElement.getAttribute('data-path')
@@ -462,3 +485,58 @@ module.exports =
 
             Checkout: =>
               @gitCheckouthead fileName
+
+
+  gitPush: (name)->
+    if name?
+      if @getRepository()
+        options =
+          cwd: @getRepository().getWorkingDirectory()
+          timeout: 30000
+          maxBuffer: 1048576
+        exec 'git push '+@tualoGitContextView.remote+' '+name,options, (err,stdout,stderr) =>
+          if err
+            @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+          else
+            @showMessage '<pre>'+''+stderr+" "+stdout+'</pre>', 5000
+
+
+  pushoriginCMD: (name)->
+    me = @
+
+    () ->
+      me.pushorigin name
+  pushorigin: (name)->
+    me = @
+    if @getRepository()
+      atom.confirm
+          message: "Push branch "+name+" to "+me.tualoGitContextView.remote+". Are you sure?"
+          buttons:
+            Cancel: =>
+
+            Push: =>
+              me.gitPush name
+
+  gitCheckout: (name)->
+    if name?
+      if @getRepository()
+        options =
+          cwd: @getRepository().getWorkingDirectory()
+          timeout: 30000
+          maxBuffer: 1048576
+        exec 'git checkout '+name,options, (err,stdout,stderr) =>
+          if err
+            @showMessage '<pre>'+'ERROR '+err+'</pre>', 5000
+          else
+            @showMessage '<pre>'+''+stderr+" "+stdout+'</pre>', 5000
+
+          @tualoGitContextView.getBranches()
+
+  checkoutCMD: (name)->
+    me = @
+    () ->
+      me.checkout name
+  checkout: (name)->
+    if @getRepository()
+
+      @gitCheckout name

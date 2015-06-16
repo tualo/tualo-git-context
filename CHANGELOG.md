@@ -1,3 +1,7 @@
+## 0.6.10
+* added checkout branches
+* added push to remote
+
 ## 0.6.9
 * fixed gitignore undefined function error
 
