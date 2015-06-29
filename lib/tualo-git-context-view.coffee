@@ -52,9 +52,9 @@ class TualoGitContextView
 
 
 
-    @commitMessageFilePath = '/tmp/.commitmessage'
+    @commitMessageFilePath = '.commitmessage'
     paths = atom.project.getPaths()
-    if path.length > 0
+    if paths.length > 0
       @commitMessageFilePath = path.join paths[0],'.commitmessage'
 
     @myDisposables = []
@@ -74,7 +74,7 @@ class TualoGitContextView
               @commitMsgCallback()
           shortFilePath = event.path.substring @getRepository().getWorkingDirectory().length+1
           @gitStatus shortFilePath
-          
+
     @getRemote()
     @refreshTree()
 
@@ -147,69 +147,71 @@ class TualoGitContextView
       options =
         cwd: @getRepository().getWorkingDirectory()
         timeout: 30000
-      if fs.lstatSync(longName).isDirectory()
-        me.refreshTree()
-      else
-        exec 'git status '+fileName,options, (err,stdout,stderr) =>
-          lines = stdout.split("\n")
-          state = 0
-          for i in [0...lines.length]
-            p = lines[i].indexOf(":")
-            if state == 3
-              fname = lines[i].replace(/\s/g,'')
-            else
-              fstate = lines[i].substring(0,p).replace(/\s/g,'')
-              fname = lines[i].substring(p+1).replace(/\s/g,'')
-            if me.checkLine(lines[i],texthash.state0)
-              state=0
-            if me.checkLine(lines[i],texthash.state1)
-              state=1
-            if me.checkLine(lines[i],texthash.state2)
-              state=2
-            if me.checkLine(lines[i],texthash.state3)
-              state=3
-              i++
 
-          entryNode = document.querySelector('span[data-path="'+longName+'"]')
-          if typeof entryNode != 'undefined' && entryNode != null
-
-            delete  me.statusClean[longName];
-            delete  me.statusIgnored[longName];
-            delete  me.statusNew[longName];
-            delete  me.statusChanged[longName];
-            delete  me.statusStaged[longName];
-
-            oldNames = entryNode.className.split(' ')
-            newNames = []
-            for o in [0...oldNames.length]
-              if oldNames[o] == 'tualo-git-context-nothing'
-              else if oldNames[o] == 'tualo-git-context-new'
-              else if oldNames[o] == 'tualo-git-context-staged'
-              else if oldNames[o] == 'tualo-git-context-changed'
+      if fs.existsSync(longName)
+        if fs.lstatSync(longName).isDirectory()
+          me.refreshTree()
+        else
+          exec 'git status '+fileName,options, (err,stdout,stderr) =>
+            lines = stdout.split("\n")
+            state = 0
+            for i in [0...lines.length]
+              p = lines[i].indexOf(":")
+              if state == 3
+                fname = lines[i].replace(/\s/g,'')
               else
-                newNames.push(oldNames[o])
+                fstate = lines[i].substring(0,p).replace(/\s/g,'')
+                fname = lines[i].substring(p+1).replace(/\s/g,'')
+              if me.checkLine(lines[i],texthash.state0)
+                state=0
+              if me.checkLine(lines[i],texthash.state1)
+                state=1
+              if me.checkLine(lines[i],texthash.state2)
+                state=2
+              if me.checkLine(lines[i],texthash.state3)
+                state=3
+                i++
 
-            if state == 0
-              me.statusClean[longName] =
-                entryNode: entryNode
-              newNames.push('tualo-git-context-nothing')
+            entryNode = document.querySelector('span[data-path="'+longName+'"]')
+            if typeof entryNode != 'undefined' && entryNode != null
 
-            if state == 1
-              me.statusStaged[longName] =
-                entryNode: entryNode
-              newNames.push('tualo-git-context-staged')
+              delete  me.statusClean[longName];
+              delete  me.statusIgnored[longName];
+              delete  me.statusNew[longName];
+              delete  me.statusChanged[longName];
+              delete  me.statusStaged[longName];
 
-            if state == 2
-              me.statusChanged[longName] =
-                entryNode: entryNode
-              newNames.push('tualo-git-context-changed')
+              oldNames = entryNode.className.split(' ')
+              newNames = []
+              for o in [0...oldNames.length]
+                if oldNames[o] == 'tualo-git-context-nothing'
+                else if oldNames[o] == 'tualo-git-context-new'
+                else if oldNames[o] == 'tualo-git-context-staged'
+                else if oldNames[o] == 'tualo-git-context-changed'
+                else
+                  newNames.push(oldNames[o])
 
-            if state == 3
-              me.statusNew[longName] =
-                entryNode: entryNode
-              newNames.push('tualo-git-context-new')
+              if state == 0
+                me.statusClean[longName] =
+                  entryNode: entryNode
+                newNames.push('tualo-git-context-nothing')
 
-            entryNode.className = newNames.join(' ')
+              if state == 1
+                me.statusStaged[longName] =
+                  entryNode: entryNode
+                newNames.push('tualo-git-context-staged')
+
+              if state == 2
+                me.statusChanged[longName] =
+                  entryNode: entryNode
+                newNames.push('tualo-git-context-changed')
+
+              if state == 3
+                me.statusNew[longName] =
+                  entryNode: entryNode
+                newNames.push('tualo-git-context-new')
+
+              entryNode.className = newNames.join(' ')
 
   refreshClean: (directory) ->
 
