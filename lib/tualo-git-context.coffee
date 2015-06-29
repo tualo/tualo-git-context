@@ -52,7 +52,9 @@ module.exports =
           if pathName
           else
             elem = event.target.querySelector('span[data-path]')
-            pathName = elem.getAttribute('data-path')
+            if elem
+              pathName = elem.getAttribute('data-path')
+
 
           if pathName
             if (me.getRepository())
