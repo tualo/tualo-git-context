@@ -6,16 +6,15 @@
 
 
 
-
 .tualo-git-context > .default-message {
-  color:   saturate(spin( @text-color-added, 10), 10%);
+  color:   saturate(spin( @text-color-success, 10), 10%);
 }
 
 .tualo-git-context-new {
-  color: @text-color-added
+  color: @text-color-success
 }
 .tualo-git-context-changed {
-  color: @text-color-modified
+  color: @text-color-info
 }
 
 .tualo-git-context-nothing {
@@ -23,5 +22,5 @@
 }
 
 .tualo-git-context-staged {
-  color: saturate(spin( @text-color-renamed, -10), 10%);
+  color: saturate(spin( @text-color-warning, -10), 10%);
 }
