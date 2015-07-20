@@ -52,7 +52,7 @@ module.exports =
           if pathName
           else
             elem = event.target.querySelector('span[data-path]')
-            if elem
+            if elem?
               pathName = elem.getAttribute('data-path')
 
 
