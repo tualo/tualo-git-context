@@ -171,8 +171,8 @@ class TualoGitContextView
               if me.checkLine(lines[i],texthash.state3)
                 state=3
                 i++
-
-            entryNode = document.querySelector('span[data-path="'+longName+'"]')
+            queryName = longName.replace(/"/g,'*')
+            entryNode = document.querySelector('span[data-path="'+queryName+'"]')
             if typeof entryNode != 'undefined' && entryNode != null
 
               delete  me.statusClean[longName];
@@ -268,7 +268,9 @@ class TualoGitContextView
           if (state==3 || fstate!='') and
           lines[i].indexOf("\t")==0
             longName = gitdir + '/' + fname
-            entryNode = document.querySelector('span[data-path="'+longName+'"]')
+            queryName = longName.replace(/"/g,"*")
+            #console.log longName,queryName
+            entryNode = document.querySelector('span[data-path="'+queryName+'"]')
             if typeof entryNode != 'undefined' && entryNode != null
 
               delete  me.statusClean[longName];
