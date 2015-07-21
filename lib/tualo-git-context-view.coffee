@@ -5,6 +5,7 @@
 {exec} = require 'child_process'
 fs = require 'fs'
 path = require 'path'
+os = require 'os'
 crypto = require 'crypto'
 
 # put git language stuff here
@@ -54,8 +55,10 @@ class TualoGitContextView
 
     @commitMessageFilePath = '.commitmessage'
     paths = atom.project.getPaths()
-    if paths.length > 0
-      @commitMessageFilePath = path.join paths[0],'.commitmessage'
+    #if paths.length > 0
+    #  @commitMessageFilePath = path.join paths[0],'.commitmessage'
+    #else
+    @commitMessageFilePath = path.join os.tmpdir(),'.commitmessage'
 
     @myDisposables = []
 
