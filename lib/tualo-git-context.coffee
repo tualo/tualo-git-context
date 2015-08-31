@@ -45,7 +45,11 @@ module.exports =
     atom.contextMenu.add {
       '.tree-view': [{
         label: 'Git',
+        #command:'tualo-git-context:dummy',
         shouldDisplay: (event)->
+          if me.gitSubMenu==null
+            false
+
           if typeof me.treeView == 'undefined'
             me.treeView = me.getTreeView()
           pathName = event.target.dataset.path
@@ -113,6 +117,7 @@ module.exports =
               false
           else
             false
+
         submenu: [
           {label: 'Stage (single file)', command:'tualo-git-context:staging'},
           {label: 'Commit', command:'tualo-git-context:commit'},
@@ -128,7 +133,8 @@ module.exports =
 
     @gitSubMenu = null
     for item in atom.contextMenu.itemSets
-      if item.items[0].label=='Git'
+      #if item.items[0].command == 'tualo-git-context:dummy'
+      if item.items[0].label == 'Git'
         @gitSubMenu = item.items[0] #item.items[0].submenu
     # ContextMenuManager
 

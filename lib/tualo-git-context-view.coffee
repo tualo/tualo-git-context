@@ -146,6 +146,7 @@ class TualoGitContextView
   gitStatus: (fileName)->
     me = @
     if @getRepository()
+      fileName = fileName.replace("\n","")
       longName = @getRepository().getWorkingDirectory()+'/'+fileName
       options =
         cwd: @getRepository().getWorkingDirectory()
@@ -155,16 +156,16 @@ class TualoGitContextView
         if fs.lstatSync(longName).isDirectory()
           me.refreshTree()
         else
-          exec 'git status '+fileName,options, (err,stdout,stderr) =>
+          exec 'git status "'+fileName+'"',options, (err,stdout,stderr) =>
             lines = stdout.split("\n")
             state = 0
             for i in [0...lines.length]
               p = lines[i].indexOf(":")
               if state == 3
-                fname = lines[i].replace(/\s/g,'')
+                fname = lines[i]#.replace(/\s/g,'')
               else
-                fstate = lines[i].substring(0,p).replace(/\s/g,'')
-                fname = lines[i].substring(p+1).replace(/\s/g,'')
+                fstate = lines[i].substring(0,p)#.replace(/\s/g,'')
+                fname = lines[i].substring(p+1)#.replace(/\s/g,'')
               if me.checkLine(lines[i],texthash.state0)
                 state=0
               if me.checkLine(lines[i],texthash.state1)
@@ -222,20 +223,24 @@ class TualoGitContextView
       if (err)
       else
         for i in [0...list.length]
+          #console.log list[i].path.substring(directory.path.length)
           if list[i] instanceof File
-            longName = list[i].path
+            longName = list[i].path.replace("\n","")
             if typeof @statusNew[longName]=='undefined' and
             typeof @statusChanged[longName]=='undefined' and
             typeof @statusStaged[longName]=='undefined'
-              entryNode = document.querySelector('span[data-path="'+longName+'"]')
-              if typeof entryNode != 'undefined' && entryNode != null
-                @statusClean[longName] =
-                  entryNode: entryNode
-              else
-                @statusIgnored[longName] =
-                  entryNode: entryNode
+              try
+                entryNode = document.querySelector('span[data-path="'+longName+'"]')
+                if typeof entryNode != 'undefined' && entryNode != null
+                  @statusClean[longName] =
+                    entryNode: entryNode
+                else
+                  @statusIgnored[longName] =
+                    entryNode: entryNode
+              catch e
+                console.log e
           else if list[i] instanceof Directory
-            if list[i].path.substring(0,4)=='.git'
+            if list[i].path.substring(directory.path.length).substring(0,5)!='/.git'
               @refreshClean list[i]
 
 
