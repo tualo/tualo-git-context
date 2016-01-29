@@ -77,15 +77,20 @@ module.exports =
 
               currentbranch = null
               (currentbranch = name for name of branches when branches[name].current == true)
+              try
+                if typeof me.tualoGitContextView.statusNew[pathName] == 'object' or
+                   typeof me.tualoGitContextView.statusChanged[pathName] == 'object' or
+                   fs.lstatSync(pathName).isDirectory()
+                  me.gitSubMenu.submenu.push {label: 'Stage', command:'tualo-git-context:staging'}
+              catch e
+                # do nothing
 
-              if typeof me.tualoGitContextView.statusNew[pathName] == 'object' or
-                 typeof me.tualoGitContextView.statusChanged[pathName] == 'object' or
-                 fs.lstatSync(pathName).isDirectory()
-                me.gitSubMenu.submenu.push {label: 'Stage', command:'tualo-git-context:staging'}
-
-              if typeof me.tualoGitContextView.statusStaged[pathName] == 'object' or
-                 fs.lstatSync(pathName).isDirectory()
-                me.gitSubMenu.submenu.push {label: 'Commit', command:'tualo-git-context:commit'}
+              try
+                if typeof me.tualoGitContextView.statusStaged[pathName] == 'object' or
+                   fs.lstatSync(pathName).isDirectory()
+                  me.gitSubMenu.submenu.push {label: 'Commit', command:'tualo-git-context:commit'}
+              catch e
+                # do nothing
 
               me.gitSubMenu.submenu.push {label: '-',type: 'separator'}
               me.gitSubMenu.submenu.push {label: 'Status *'+currentbranch+'*', command:'tualo-git-context:status'}
