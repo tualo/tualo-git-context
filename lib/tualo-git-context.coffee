@@ -1,6 +1,6 @@
 TualoGitContextView = require './tualo-git-context-view'
 {CompositeDisposable} = require 'atom'
-{TextEditor} = require 'atom'
+# {TextEditor} = require 'atom'
 
 {exec} = require 'child_process'
 fs = require 'fs'
