@@ -154,12 +154,8 @@ module.exports =
 
   getTreeView: ->
     result = null
-    panels = atom.workspace.getLeftPanels()
-    panels = panels.concat atom.workspace.getTopPanels()
-    panels = panels.concat atom.workspace.getRightPanels()
-    panels = panels.concat atom.workspace.getBottomPanels()
-
-    (result = item.item for item in panels when typeof item.item.getSelectedEntries == 'function' and typeof item.item.getActivePath == 'function' )
+    panes = atom.workspace.getPanes()
+    (result = item.activeItem  for item in  panes when typeof item.activeItem is 'object' and item.activeItem.constructor.name == 'TreeView' )
     result
 
     #console.log panels[0].querySelector('div.tree-view-resizer.tool-panel')
