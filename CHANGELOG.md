@@ -1,3 +1,13 @@
+## 0.6.19
+* fixing issue #31 <https://github.com/tualo/tualo-git-context/issues/31>
+
+## 0.6.18
+* fixing issue #30 <https://github.com/tualo/tualo-git-context/issues/30>
+
+## 0.6.17
+* fixing issue #28 <https://github.com/tualo/tualo-git-context/issues/28>
+* fixing issue #29 <https://github.com/tualo/tualo-git-context/issues/29>
+
 ## 0.6.17
 * fixing issue #28 <https://github.com/tualo/tualo-git-context/issues/28>
 * fixing issue #29 <https://github.com/tualo/tualo-git-context/issues/29>

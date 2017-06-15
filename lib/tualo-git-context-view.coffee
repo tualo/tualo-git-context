@@ -68,15 +68,17 @@ class TualoGitContextView
         @gitStatus shortFilePath
 
     atom.workspace.observeTextEditors (editor) =>
-      if @getRepository()
+      me = @
+      if me.getRepository()
         @myDisposables.push editor.onDidSave (event) =>
           if event.path == @commitMessageFilePath or
              event.path == '/private'+@commitMessageFilePath
             atom.workspace.destroyActivePaneItem()
             if typeof @commitMsgCallback == 'function'
-              @commitMsgCallback()
-          shortFilePath = event.path.substring @getRepository().getWorkingDirectory().length+1
-          @gitStatus shortFilePath
+              me.commitMsgCallback()
+          if me.getRepository()
+            shortFilePath = event.path.substring me.getRepository().getWorkingDirectory().length+1
+            me.gitStatus shortFilePath
 
     @getRemote()
     @refreshTree()
